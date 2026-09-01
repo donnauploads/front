@@ -1,6 +1,7 @@
 import { apiFetch } from "@/lib/api/client"
 import { clearAccessToken, setAccessToken } from "@/lib/api/token-store"
 import { setAppLock } from "@/lib/security/app-lock"
+import { markSelfReauth } from "@/lib/auth/reauth-guard"
 
 /**
  * Adapter mirrors backend at apps/api/src/modules/auth/auth.controller.ts.
@@ -145,6 +146,11 @@ export async function signInWithBiometric(
   if (typeof window === "undefined" || !window.PublicKeyCredential) {
     throw new Error("This browser doesn't support biometric sign-in.")
   }
+
+  // We're about to issue a new session, which revokes the current one as
+  // `newer_login`. Open the ignore window BEFORE the ceremony so the incoming
+  // `session.revoked` push (which can beat our token swap) doesn't log us out.
+  markSelfReauth()
 
   // Passing email scopes allowCredentials to that user's enrollments —
   // platforms with a single match (typical) skip the passkey picker and

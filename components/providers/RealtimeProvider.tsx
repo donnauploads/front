@@ -4,6 +4,7 @@ import { useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { useStore } from "@/lib/store"
 import { clearAccessToken, getAccessTokenSid } from "@/lib/api/token-store"
+import { isSelfReauthActive } from "@/lib/auth/reauth-guard"
 import { disconnectSocket, getSocket } from "@/lib/realtime/socket"
 import { useToast } from "@/components/providers/ToastProvider"
 
@@ -73,13 +74,15 @@ export function RealtimeProvider({
       reason: string
       at: string
     }) {
-      // Only log out if the session that got revoked is the one WE'RE on.
-      // Re-authenticating on this device (e.g. biometric unlock on the app
-      // lock) issues a new session and revokes the old one as `newer_login`;
-      // since we've already adopted the new token, that stale revocation must
-      // be ignored — otherwise we'd kick ourselves to /login right after
-      // unlocking. A revocation of our current session (logged in elsewhere,
-      // admin revoke, password change) still logs us out.
+      // Ignore the `newer_login` revoke caused by OUR OWN re-authentication on
+      // this device (biometric unlock). markSelfReauth() opened a short window
+      // right before the ceremony; this is race-proof regardless of whether
+      // the push beats our new-token swap.
+      if (p.reason === "newer_login" && isSelfReauthActive()) {
+        return
+      }
+      // Secondary guard: only log out if the revoked session is the one WE'RE
+      // currently on. A revoke of a different/older session isn't our concern.
       const currentSid = getAccessTokenSid()
       if (currentSid && p.sessionId && p.sessionId !== currentSid) {
         return
