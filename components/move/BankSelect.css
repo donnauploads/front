@@ -1,0 +1,89 @@
+/* Self-contained styles for the BankSelect bank-picker modal.
+ *
+ * Co-located with the component and imported by it, so the picker works on
+ * EVERY route — the customer app (which also loads dashboard-sb.css) AND
+ * the admin area (which does NOT). Previously the picker reused
+ * dashboard-sb.css's `.modal-*` / `.bank-row` classes, so on the admin
+ * wires page it rendered completely unstyled (no fixed overlay) and the
+ * bank list never appeared.
+ *
+ * Class names are `bp-*` (bank-picker) scoped so they can't collide with a
+ * route's own `.modal-*` rules. Design tokens (--surface, --line, --gold…)
+ * resolve from globals.css :root, which is loaded app-wide.
+ */
+
+.bp-scrim {
+  position: fixed; inset: 0; z-index: 1000;
+  display: flex; align-items: center; justify-content: center;
+  padding: 20px;
+  background: rgba(28, 26, 23, 0.55);
+}
+
+.bp-card {
+  position: relative; z-index: 1;
+  width: 100%; max-width: 440px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  box-shadow: var(--shadow-lg, 0 30px 70px -30px rgba(30, 28, 23, 0.42));
+  padding: 22px;
+  /* dvh = visible viewport on iOS; vh kept as fallback. */
+  max-height: calc(100vh - 40px);
+  max-height: calc(100dvh - 40px);
+  overscroll-behavior: contain;
+}
+
+.bp-grip { display: none; }
+
+.bp-head {
+  display: flex; align-items: flex-start; justify-content: space-between;
+  gap: 12px;
+}
+.bp-title {
+  font-family: var(--serif); font-size: 18px; font-weight: 700;
+  color: var(--text-strong); line-height: 1.25; overflow-wrap: anywhere;
+}
+.bp-x {
+  flex-shrink: 0; width: 32px; height: 32px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  color: var(--ink-mute); background: transparent; border: 0; cursor: pointer;
+  transition: background .2s, color .2s;
+}
+.bp-x:hover { background: var(--surface-2); color: var(--text-strong); }
+.bp-x svg { width: 17px; height: 17px; }
+
+/* Bank rows — hover via CSS (no JS mouse handlers, which cause iOS
+   sticky-hover / double-tap). Selected row keeps the gold fill. */
+.bp-row {
+  width: 100%; display: flex; align-items: center; gap: 14px;
+  padding: 14px 18px; border-radius: 14px; border: 1px solid #ECE8DF;
+  background: #F6F4EF; cursor: pointer; text-align: left;
+  transition: background .12s, border-color .12s;
+}
+.bp-row:hover { background: #F0EDE5; border-color: rgba(201, 169, 74, 0.45); }
+.bp-row[aria-selected="true"],
+.bp-row[aria-selected="true"]:hover {
+  background: var(--gold-soft); border-color: var(--gold);
+}
+
+@media (max-width: 640px) {
+  .bp-scrim { padding: 0; align-items: flex-end; }
+  .bp-card {
+    max-width: none;
+    border-radius: 16px 16px 0 0;
+    border-bottom: 0;
+    /* Fixed sheet height — does NOT grow/shrink with the number of search
+       results. JS sets --bp-sheet-h to fit the visible viewport above the
+       keyboard; the vh/dvh values are fallbacks for browsers without
+       visualViewport (older Safari first, then dvh). */
+    height: 90vh;
+    height: var(--bp-sheet-h, 90dvh);
+    max-height: 90vh;
+    max-height: var(--bp-sheet-h, 90dvh);
+    padding: 18px 18px calc(20px + env(safe-area-inset-bottom));
+  }
+  .bp-grip {
+    display: block; width: 40px; height: 4px; border-radius: 4px;
+    background: var(--line); margin: 0 auto 14px;
+  }
+}

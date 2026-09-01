@@ -1,0 +1,267 @@
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap");
+
+/* State Bank — Sign-in page.
+   Ported from the design bundle's assets/portal.css. Loads alongside
+   globals.css :root tokens (charcoal + mustard + red). Self-contained so
+   the login route doesn't pull in sb-home.css or signup-sb.css. */
+
+:root { --serif: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+
+/* ── Base button (subset of styles.css used on this page) ─────────────── */
+.login-page .btn {
+  display: inline-flex; align-items: center; gap: 10px;
+  font-family: var(--sans); font-weight: 600; font-size: 15px;
+  padding: 14px 26px; border-radius: 2px;
+  transition: transform .35s var(--ease), background .25s, color .25s, box-shadow .35s var(--ease);
+  letter-spacing: .01em; cursor: pointer; border: 0; color: inherit;
+}
+.login-page .btn:disabled { opacity: .55; cursor: not-allowed; }
+.login-page .btn .arrow { transition: transform .35s var(--ease); }
+.login-page .btn:hover:not(:disabled) .arrow { transform: translateX(4px); }
+.login-page .btn-navy { background: var(--navy); color: var(--white, #fff); }
+.login-page .btn-navy:hover:not(:disabled) { background: var(--navy-700); transform: translateY(-2px); box-shadow: var(--shadow-md); }
+
+/* ── Two-panel layout ─────────────────────────────────────────────────── */
+.login-page {
+  min-height: 100vh; min-height: -webkit-fill-available; min-height: 100dvh; display: grid; grid-template-columns: 1.05fr 1fr;
+  background: var(--paper); font-family: var(--sans); color: var(--ink-warm);
+}
+.login-page * { box-sizing: border-box; }
+.login-page a { color: inherit; text-decoration: none; }
+.login-page img { display: block; max-width: 100%; }
+.login-page h1, .login-page h2, .login-page h3 { margin: 0; font-family: var(--serif); font-weight: 600; }
+.login-page p { margin: 0; }
+
+/* ── Brand panel (left) ───────────────────────────────────────────────── */
+.login-brand {
+  position: relative; overflow: hidden; background: var(--navy-deep); color: #fff;
+  padding: clamp(40px, 5vw, 72px);
+  display: flex; flex-direction: column; justify-content: space-between;
+}
+.login-brand .lb-sky {
+  position: absolute; inset: 0;
+  background:
+    radial-gradient(110% 80% at 80% 5%, rgba(201,169,97,.22), transparent 55%),
+    linear-gradient(180deg, #3A3631, #2B2926 55%, #1C1A17);
+}
+.login-brand .lb-cols {
+  position: absolute; inset: 0;
+  background-image: repeating-linear-gradient(90deg, transparent 0 54px, rgba(201,169,97,.12) 54px 56px);
+  mask-image: linear-gradient(0deg, #000, transparent 75%);
+  -webkit-mask-image: linear-gradient(0deg, #000, transparent 75%);
+}
+.login-brand > * { position: relative; z-index: 2; }
+.login-brand .lb-top { display: inline-flex; align-items: center; gap: 16px; }
+.login-brand .lb-logo { height: 44px; width: auto; max-width: 100%; background: #fff; padding: 10px 16px; border-radius: 9px; box-sizing: content-box; }
+.login-brand h1 { font-size: clamp(30px, 3.4vw, 48px); line-height: 1.1; max-width: 14ch; color: #fff; }
+.login-brand h1 .it { font-style: italic; color: var(--gold-soft); }
+.login-brand .lb-lede { color: rgba(255,255,255,.74); font-size: 17px; margin-top: 18px; max-width: 42ch; }
+.login-brand .lb-foot { font-size: 13px; color: rgba(255,255,255,.5); display: flex; align-items: center; gap: 10px; }
+.login-brand .lb-secure { display: inline-flex; align-items: center; gap: 8px; color: var(--gold-soft); font-size: 13.5px; font-weight: 600; }
+.login-brand .lb-secure svg { width: 16px; height: 16px; }
+
+/* ── Form panel (right) ───────────────────────────────────────────────── */
+.login-form-wrap { display: flex; align-items: center; justify-content: center; padding: clamp(20px, 4vw, 44px); }
+.login-card { width: 100%; max-width: 400px; }
+.login-card .lc-eyebrow { display: inline-block; font-size: 12px; font-weight: 700; letter-spacing: .18em; text-transform: uppercase; color: var(--gold-deep); }
+.login-card h2 { font-size: 27px; color: var(--text-strong); margin-top: 8px; }
+.login-card .lc-sub { color: var(--ink-soft); font-size: 14px; line-height: 1.45; margin-top: 7px; margin-bottom: 20px; }
+
+.field { margin-bottom: 13px; }
+.field label { display: block; font-size: 12.5px; font-weight: 600; color: var(--ink-warm); margin-bottom: 6px; letter-spacing: .01em; }
+.field .control { position: relative; display: flex; align-items: center; }
+.field .control > svg { position: absolute; left: 14px; width: 18px; height: 18px; color: var(--ink-mute); pointer-events: none; }
+.field input {
+  width: 100%; padding: 11px 14px 11px 42px; font-family: var(--sans); font-size: 15px;
+  border: 1.5px solid var(--line); border-radius: 8px; background: var(--surface); color: var(--ink-warm);
+  outline: none; transition: border-color .2s, box-shadow .2s;
+}
+.field input:focus { border-color: var(--gold); box-shadow: 0 0 0 4px rgba(201,162,74,.18); }
+.field .control input.has-trailing { padding-right: 44px; }
+.field .control .eye-btn {
+  position: absolute; right: 12px; display: inline-flex; align-items: center; justify-content: center;
+  width: 26px; height: 26px; color: var(--ink-mute); background: transparent; border: 0; cursor: pointer;
+}
+.field .control .eye-btn:hover { color: var(--text-strong); }
+.field .control .eye-btn svg { width: 18px; height: 18px; }
+
+.login-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; font-size: 13.5px; }
+.login-row a { color: var(--gold-deep); font-weight: 600; }
+.login-row a:hover { text-decoration: underline; }
+.btn-login { width: 100%; justify-content: center; padding: 13px; font-size: 15px; border-radius: 8px; }
+
+.login-or { display: flex; align-items: center; gap: 14px; margin: 12px 0; color: var(--ink-mute); font-size: 11.5px; font-weight: 700; letter-spacing: .12em; }
+.login-or::before, .login-or::after { content: ""; flex: 1; height: 1px; background: var(--line); }
+
+.btn-biometric {
+  display: flex; align-items: center; justify-content: center; gap: 10px; width: 100%;
+  padding: 13px; border-radius: 8px; background: var(--surface, #fff);
+  border: 1.5px solid var(--line); color: var(--text-strong, var(--navy));
+  font-family: var(--sans); font-size: 15px; font-weight: 600;
+  cursor: pointer; transition: border-color .2s, background .2s, transform .15s var(--ease);
+}
+.btn-biometric:disabled { opacity: .55; cursor: not-allowed; }
+.btn-biometric:hover:not(:disabled) { border-color: var(--gold); background: var(--paper); }
+.btn-biometric:active:not(:disabled) { transform: scale(.99); }
+.btn-biometric svg { width: 22px; height: 22px; color: var(--gold-deep); }
+.btn-biometric.scanning { border-color: var(--gold); color: var(--gold-deep); }
+.btn-biometric.scanning svg { animation: bioPulse 1s ease-in-out infinite; }
+@keyframes bioPulse { 0%,100% { opacity: 1; } 50% { opacity: .4; } }
+
+.login-mfa {
+  margin-top: 14px; padding: 11px 14px;
+  background: var(--paper); border: 1px solid var(--paper-line);
+  border-radius: 3px; font-size: 12px; line-height: 1.45; color: var(--ink-soft);
+  display: flex; gap: 9px; align-items: flex-start;
+}
+.login-mfa svg { width: 18px; height: 18px; color: var(--gold-deep); flex-shrink: 0; margin-top: 1px; }
+
+.login-back { margin-top: 16px; text-align: center; font-size: 13.5px; }
+.login-back a { color: var(--ink-soft); display: inline-flex; align-items: center; gap: 7px; }
+.login-back a:hover { color: var(--text-strong); }
+.login-back strong { color: var(--ink-warm); font-weight: 700; }
+
+/* ── OTP grid + per-cell error / shake (used by /login/mfa) ───────────── */
+/* Fluid 6-up grid: the columns always sum to the container width (gap
+   included), so the boxes shrink to fit any screen instead of overflowing
+   on small phones. The gap and font scale down with the viewport too. */
+.otp-grid {
+  display: grid; grid-template-columns: repeat(6, 1fr);
+  gap: clamp(6px, 2.2vw, 12px); margin-bottom: 8px;
+}
+.otp-input {
+  width: 100%; min-width: 0; aspect-ratio: 0.86; max-width: 60px;
+  margin-inline: auto; text-align: center;
+  font-family: var(--serif); font-size: clamp(20px, 6vw, 28px); font-weight: 600;
+  color: var(--text-strong);
+  border: 1.5px solid var(--line); border-radius: 5px; background: var(--surface);
+  outline: none; transition: border-color .2s, box-shadow .2s, background .2s;
+  -moz-appearance: textfield;
+}
+.otp-input::-webkit-outer-spin-button,
+.otp-input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+.otp-input:focus { border-color: var(--gold); box-shadow: 0 0 0 4px rgba(201,162,74,.18); }
+.otp-input.filled { border-color: var(--text-strong); background: var(--paper); }
+.otp-input.error { border-color: #C0392B; box-shadow: 0 0 0 4px rgba(192,57,43,.12); }
+@keyframes otpShake {
+  0%, 100% { transform: translateX(0); }
+  20%, 60% { transform: translateX(-6px); }
+  40%, 80% { transform: translateX(6px); }
+}
+.otp-grid.shake { animation: otpShake .4s; }
+.otp-err {
+  font-size: 13px; color: #C0392B; min-height: 18px; margin-bottom: 18px;
+  display: flex; align-items: center; gap: 7px;
+  opacity: 0; transition: opacity .2s;
+}
+.otp-err.show { opacity: 1; }
+.otp-err svg { width: 15px; height: 15px; }
+.otp-resend { margin-top: 24px; font-size: 14px; color: var(--ink-soft); text-align: center; }
+.otp-resend button {
+  color: var(--gold-deep); font-weight: 600;
+  font-family: var(--sans); font-size: 14px;
+  background: transparent; border: 0; cursor: pointer; padding: 0;
+}
+.otp-resend button:disabled { color: var(--ink-mute); cursor: default; }
+.login-hint { margin-top: 12px; text-align: center; font-size: 12px; color: var(--ink-mute); }
+
+/* ── Inline spinner for in-flight submit/biometric ────────────────────── */
+.login-spinner {
+  display: inline-block; width: 18px; height: 18px;
+  border-radius: 50%; border: 2px solid rgba(255,255,255,.35); border-top-color: #fff;
+  animation: loginSpin .8s linear infinite;
+}
+.btn-biometric .login-spinner { border-color: rgba(33,31,27,.18); border-top-color: var(--gold-deep); }
+@keyframes loginSpin { to { transform: rotate(360deg); } }
+
+/* ── Mobile auth bar (≤720px) — same spec as signup ───────────────────── */
+.m-authbar { display: none; }
+@media (max-width: 880px) {
+  /* Pin the auth-bar to its content height; let the form-wrap absorb
+     the rest of the viewport. Without explicit rows the grid stretches
+     both rows proportionally and the white auth-bar grows into a tall
+     empty band above the logo. Breakpoint bumped 720→880 to close the
+     tablet gap between login mobile and signup desktop two-panel. */
+  .login-page { grid-template-columns: 1fr; grid-template-rows: auto 1fr; align-content: start; }
+  .login-brand { display: none; }
+  /* On mobile, drop the vertical centering + heavy padding-top so the
+     form sits right under the auth-bar instead of floating in the
+     middle of the viewport. */
+  .login-form-wrap { align-items: flex-start; padding-top: 24px; }
+  .m-authbar {
+    display: flex; align-items: center; justify-content: space-between; gap: 12px;
+    position: sticky; top: 0; z-index: 70;
+    background: #fff; padding: 11px 18px;
+    border-bottom: 1px solid var(--line);
+    box-shadow: 0 2px 14px rgba(30,28,23,.08);
+  }
+  /* Scoped to .login-page so the rule cannot cascade-collide with the
+     signup route's .mab-logo declaration when both stylesheets sit in
+     the document head after client-side nav. */
+  .login-page .mab-brand { display: inline-flex; align-items: center; min-width: 0; text-decoration: none; }
+  .login-page .mab-logo { height: 54px; width: auto; max-width: 280px; display: block; }
+  @media (max-width: 400px) { .login-page .mab-logo { height: 46px; max-width: 230px; } }
+  .mab-burger {
+    width: 44px; height: 44px; display: flex; flex-direction: column; gap: 5px;
+    align-items: center; justify-content: center; flex-shrink: 0;
+    background: transparent; border: 0; cursor: pointer;
+  }
+  .mab-burger span {
+    width: 24px; height: 2px; background: var(--navy); border-radius: 2px;
+    transition: transform .3s var(--ease), opacity .3s;
+  }
+  .mab-burger.active span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+  .mab-burger.active span:nth-child(2) { opacity: 0; }
+  .mab-burger.active span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+  .mab-menu {
+    position: absolute; top: 100%; right: 12px; left: 12px;
+    background: #fff; border: 1px solid var(--line); border-top: 2px solid var(--gold);
+    box-shadow: var(--shadow-md); padding: 8px; border-radius: 0 0 4px 4px;
+    display: none; flex-direction: column;
+  }
+  .mab-menu.open { display: flex; }
+  .mab-menu a {
+    padding: 13px 14px; font-size: 15px; font-weight: 600; color: var(--ink-warm);
+    border-radius: 3px; text-decoration: none;
+    transition: background .2s, color .2s;
+  }
+  .mab-menu a:hover, .mab-menu a:active { background: var(--paper); color: var(--navy); }
+}
+
+/* ─────────────────────────────────────────────────────────────────────
+   Forgot-password flow (/forgot-password). Reuses .login-page + .login-card
+   from above; the .fp-* rules below cover the per-step animation, the
+   collapsible password-requirements list, and the success-state badge.
+   ───────────────────────────────────────────────────────────────────── */
+.fp-step { display: none; }
+.fp-step.active { display: block; animation: fpIn .35s var(--ease); }
+@keyframes fpIn {
+  from { opacity: 0; transform: translateX(14px); }
+  to   { opacity: 1; transform: none; }
+}
+
+/* Password requirement checklist — collapsed until the field is focused,
+   then slides in with a max-height transition. */
+.fp-reqs {
+  list-style: none; padding: 0; margin: 0;
+  display: grid; grid-template-columns: 1fr; gap: 7px;
+  max-height: 0; overflow: hidden; opacity: 0;
+  transition: max-height .3s var(--ease), opacity .25s, margin .3s var(--ease);
+}
+.fp-reqs.show { max-height: 220px; opacity: 1; margin: 6px 0 16px; }
+.fp-reqs li {
+  display: flex; align-items: center; gap: 7px;
+  font-size: 12.5px; color: var(--ink-mute);
+}
+.fp-reqs li svg { width: 14px; height: 14px; color: var(--paper-line); flex-shrink: 0; }
+.fp-reqs li.ok { color: var(--ink-soft); }
+.fp-reqs li.ok svg { color: #2F8A5B; }
+
+.fp-done { text-align: center; }
+.fp-check {
+  width: 64px; height: 64px; border-radius: 50%;
+  background: rgba(47,138,91,.12); color: #2F8A5B;
+  display: flex; align-items: center; justify-content: center;
+  margin: 0 auto 20px;
+}
+.fp-check svg { width: 32px; height: 32px; }

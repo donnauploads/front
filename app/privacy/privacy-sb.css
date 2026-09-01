@@ -1,0 +1,294 @@
+/* ============================================================
+   State Bank — Privacy Notice (legal document)
+   Reuses the homepage chrome (topbar / nav / footer / btn) from
+   sb-home.css and styles the long-form policy body here.
+   Palette: warm charcoal + mustard gold; Playfair (serif) + Inter (sans).
+   ============================================================ */
+@import url("https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,500;1,600&family=Inter:wght@400;500;600;700&display=swap");
+
+/* Document shell ------------------------------------------------ */
+.privacy-sb {
+  background: var(--white);
+  color: var(--ink);
+  font-family: var(--sans);
+}
+
+/* Page banner above the article */
+.pp-banner {
+  background: var(--navy-deep);
+  color: var(--white);
+  border-bottom: 3px solid var(--gold);
+  position: relative;
+  overflow: hidden;
+}
+.pp-banner::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: repeating-linear-gradient(
+    90deg,
+    rgba(201, 169, 97, 0) 0px,
+    rgba(201, 169, 97, 0) 46px,
+    rgba(201, 169, 97, 0.12) 46px,
+    rgba(201, 169, 97, 0.12) 48px
+  );
+  mask-image: linear-gradient(90deg, transparent, #000 60%);
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 60%);
+  pointer-events: none;
+}
+.pp-banner .wrap {
+  position: relative;
+  z-index: 1;
+  padding-block: clamp(40px, 6vw, 72px);
+}
+.pp-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 12.5px;
+  font-weight: 600;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--gold-soft);
+  margin-bottom: 18px;
+}
+.pp-eyebrow::before {
+  content: "";
+  width: 30px;
+  height: 1.5px;
+  background: var(--gold);
+}
+.pp-banner h1 {
+  font-family: var(--serif);
+  font-weight: 600;
+  font-size: clamp(32px, 4.6vw, 56px);
+  line-height: 1.06;
+  letter-spacing: -0.015em;
+  color: #fff;
+  max-width: 18ch;
+}
+.pp-banner .pp-updated {
+  margin-top: 18px;
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.7);
+  letter-spacing: 0.02em;
+}
+
+/* Article body ------------------------------------------------- */
+.pp-doc {
+  max-width: 860px;
+  margin: 0 auto;
+  padding: clamp(40px, 6vw, 72px) var(--gutter) clamp(56px, 8vw, 96px);
+}
+
+.pp-doc .pp-lead {
+  font-size: 16.5px;
+  line-height: 1.7;
+  color: var(--ink-soft);
+}
+.pp-doc .pp-lead + .pp-lead {
+  margin-top: 18px;
+}
+
+.pp-doc p {
+  font-size: 15.5px;
+  line-height: 1.72;
+  color: var(--ink-soft);
+}
+.pp-doc .pp-block > p + p,
+.pp-doc .pp-block > p + ul,
+.pp-doc .pp-block > ul + p {
+  margin-top: 16px;
+}
+
+.pp-doc a {
+  color: var(--gold-deep);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  text-decoration-thickness: 1px;
+  transition: color 0.2s;
+}
+.pp-doc a:hover {
+  color: var(--navy);
+}
+
+.pp-doc strong {
+  color: var(--ink);
+  font-weight: 700;
+}
+.pp-doc .u {
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+/* Lists */
+.pp-doc ul {
+  list-style: disc;
+  padding-left: 22px;
+  margin: 0;
+}
+.pp-doc ul li {
+  font-size: 15.5px;
+  line-height: 1.7;
+  color: var(--ink-soft);
+  margin-top: 12px;
+}
+.pp-doc ul li::marker {
+  color: var(--gold-deep);
+}
+.pp-doc ul ul {
+  list-style: square;
+  padding-left: 22px;
+  margin-top: 8px;
+}
+
+/* Table of contents */
+.pp-toc {
+  margin-top: clamp(40px, 5vw, 64px);
+  background: var(--surface-2);
+  border: 1px solid var(--line);
+  border-left: 3px solid var(--gold);
+  border-radius: 4px;
+  padding: clamp(24px, 3vw, 36px);
+}
+.pp-toc h2 {
+  font-family: var(--serif);
+  font-weight: 600;
+  font-size: clamp(22px, 2.6vw, 30px);
+  color: var(--navy);
+  letter-spacing: -0.01em;
+}
+.pp-toc ol {
+  margin: 20px 0 0;
+  padding-left: 26px;
+  list-style: upper-roman;
+}
+.pp-toc > ol > li {
+  margin-top: 12px;
+  color: var(--ink-soft);
+  font-size: 15px;
+}
+.pp-toc > ol > li::marker {
+  color: var(--gold-deep);
+  font-weight: 600;
+}
+.pp-toc ol ol {
+  list-style: upper-alpha;
+  margin-top: 10px;
+  padding-left: 26px;
+}
+.pp-toc a {
+  color: var(--gold-deep);
+  text-decoration: none;
+  font-weight: 500;
+}
+.pp-toc a:hover {
+  color: var(--navy);
+  text-decoration: underline;
+}
+
+/* Numbered sections */
+.pp-section {
+  margin-top: clamp(48px, 6vw, 72px);
+  scroll-margin-top: 90px;
+}
+.pp-section > h2 {
+  font-family: var(--serif);
+  font-weight: 600;
+  font-size: clamp(26px, 3.2vw, 38px);
+  line-height: 1.12;
+  letter-spacing: -0.01em;
+  color: var(--navy);
+  padding-bottom: 16px;
+  border-bottom: 2px solid var(--navy);
+}
+.pp-section > h2 .pp-num {
+  color: var(--gold-deep);
+  margin-right: 12px;
+}
+.pp-section .pp-block {
+  margin-top: 22px;
+}
+
+/* Sub-sections */
+.pp-sub {
+  margin-top: clamp(32px, 4vw, 48px);
+  scroll-margin-top: 90px;
+}
+.pp-sub > h3 {
+  font-family: var(--serif);
+  font-weight: 600;
+  font-size: clamp(21px, 2.4vw, 27px);
+  line-height: 1.18;
+  letter-spacing: -0.01em;
+  color: var(--navy);
+}
+.pp-sub > h3 .pp-num {
+  color: var(--gold-deep);
+  margin-right: 10px;
+}
+.pp-sub .pp-block {
+  margin-top: 18px;
+}
+
+/* Inner numbered headings (1. Notice of Collection, etc.) */
+.pp-h4 {
+  font-family: var(--sans);
+  font-weight: 700;
+  font-size: 17px;
+  color: var(--navy);
+  margin-top: 30px;
+}
+
+/* Disclosure table */
+.pp-table-wrap {
+  margin-top: 24px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  overflow: hidden;
+}
+.pp-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+  font-size: 14px;
+}
+.pp-table thead th {
+  background: var(--navy);
+  color: #fff;
+  font-family: var(--sans);
+  font-weight: 700;
+  font-size: 12.5px;
+  letter-spacing: 0.04em;
+  padding: 14px 16px;
+}
+.pp-table tbody td {
+  padding: 13px 16px;
+  vertical-align: top;
+  color: var(--ink-soft);
+  line-height: 1.55;
+  border-bottom: 1px solid var(--line);
+}
+.pp-table tbody tr:nth-child(even) {
+  background: var(--surface-2);
+}
+.pp-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+/* Spacing between stacked blocks inside a section */
+.pp-block + .pp-block,
+.pp-block + .pp-table-wrap,
+.pp-table-wrap + .pp-block {
+  margin-top: 16px;
+}
+
+@media (max-width: 560px) {
+  .pp-table {
+    font-size: 13px;
+  }
+  .pp-table thead th,
+  .pp-table tbody td {
+    padding: 11px 12px;
+  }
+}

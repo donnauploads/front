@@ -1,0 +1,98 @@
+# ─── Dependencies ──────────────────────────────────────────────────────
+node_modules/
+.pnp
+.pnp.*
+.yarn/install-state.gz
+
+# ─── Build output ──────────────────────────────────────────────────────
+.next/
+out/
+build/
+dist/
+
+# ─── Env / secrets (NEVER commit) ──────────────────────────────────────
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.crt
+*.p12
+*.pfx
+secrets/
+.secrets/
+
+# ─── Auth / session ────────────────────────────────────────────────────
+.auth/
+auth.json
+cookies.txt
+
+# ─── TypeScript / Next ─────────────────────────────────────────────────
+*.tsbuildinfo
+next-env.d.ts
+
+# ─── Test / coverage ───────────────────────────────────────────────────
+coverage/
+.nyc_output/
+playwright-report/
+test-results/
+*.lcov
+
+# ─── Caches ────────────────────────────────────────────────────────────
+.cache/
+.turbo/
+.swc/
+.eslintcache
+.parcel-cache/
+.vercel
+.netlify
+.sentryclirc
+
+# ─── Logs ──────────────────────────────────────────────────────────────
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+logs/
+
+# ─── Editor / IDE (may contain local paths, tokens, history) ──────────
+.idea/
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json.example
+.history/
+*.code-workspace
+*.swp
+*.swo
+
+# ─── OS junk ───────────────────────────────────────────────────────────
+.DS_Store
+.AppleDouble
+.LSOverride
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# ─── Local / personal scratch ──────────────────────────────────────────
+*.local
+*.local.*
+TODO.local.md
+NOTES.local.md
+scratch/
+tmp/
+.tmp/
+
+# ─── Tunnels / dev exposure ────────────────────────────────────────────
+.cloudflared/
+ngrok.yml
+tunnel.yml
+# ─── Design / handoff references (NOT part of the app) ─────────────────
+# Visual mirrors kept only for the Claude Design handoff. Anchored to the
+# repo root with a trailing slash so they're matched as directories and
+# never re-committed. NOTE: .gitignore does NOT untrack files that are
+# already committed — run `git rm -r --cached <dir>` once to purge those.
+/admin-frame/
+/.design_ref/

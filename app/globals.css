@@ -1,0 +1,211 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer utilities {
+  /* Hide native scrollbars while keeping scroll behavior. */
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+@layer base {
+  :root {
+    --nav-h: 48px;
+    /* Dark theme (default). Channels are stored as RGB triplets so
+       Tailwind tokens can apply Tailwind's <alpha-value> notation
+       (e.g. bg-flush, bg-flush/40 both work). */
+    --color-flush: 10 31 26;       /* #0A1F1A */
+    --color-kale: 26 77 62;        /* #1A4D3E */
+    --color-ink: 255 255 255;      /* #FFFFFF */
+    --color-ink-muted: 168 194 178;/* #A8C2B2 */
+    color-scheme: dark;
+
+    /* ── State Bank design tokens (shared with signup-sb.css). Promoted here so
+       every customer-app route can use the same palette without having
+       to import the signup stylesheet. Use these — do NOT hardcode hex.
+       Updated to the redesigned charcoal + mustard + red palette
+       (was navy/gold). ── */
+    --navy:        #2B2926;       /* primary dark (warm charcoal) */
+    --navy-deep:   #1C1A17;       /* near-black bars */
+    --navy-700:    #3D3934;       /* charcoal hover */
+    --gold:        #C9A24A;       /* mustard gold */
+    --gold-soft:   #DCC07E;
+    --gold-deep:   #97793A;       /* bronze */
+    --red:         #B5121B;       /* consumer-protection red */
+    --red-deep:    #8E0E15;
+    --paper:       #F4F1EA;       /* soft warm gray */
+    --paper-line:  #E7E1D3;
+    --line:        #E2DDD0;
+    --surface:     #FFFFFF;
+    --surface-2:   #FBF9F4;
+    --ink-warm:    #211F1B;       /* renamed from --ink to avoid clobbering the dark-theme --ink above */
+    --ink-soft:    #514D45;
+    --ink-mute:    #756F66;
+    --text-strong: #2B2926;
+    --shadow-sm:   0 2px 8px rgba(30,28,23,.07);
+    --shadow-md:   0 14px 40px -18px rgba(30,28,23,.30);
+    --shadow-lg:   0 30px 70px -30px rgba(30,28,23,.42);
+    --serif:       "Playfair Display", Georgia, "Times New Roman", serif;
+    --sans:        "Inter", "Plus Jakarta Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    --ease:        cubic-bezier(.22,.61,.36,1);
+  }
+  /* Explicit dark class matches the `class` attribute strategy used by
+     next-themes; redundant with :root defaults but lets the same
+     overrides work even when `html` has class="dark" set explicitly. */
+  html.dark {
+    --color-flush: 10 31 26;
+    --color-kale: 26 77 62;
+    --color-ink: 255 255 255;
+    --color-ink-muted: 168 194 178;
+    color-scheme: dark;
+  }
+  /* ── State Bank dark palette — DASHBOARD ONLY ───────────────────────────────────
+     Scoped to `.app` (the customer-app shell, rendered by AppShell) so the
+     Appearance theme applies STRICTLY to the user dashboard. Login, signup,
+     the marketing homepage, and the admin area all consume these same State Bank
+     tokens but live outside `.app`, so they keep the light :root values no
+     matter what theme the user picked — and a logged-out user (login page)
+     is always light. Flip the semantic surface/ink tokens; brand accents
+     (--navy, --gold*, --red*) stay as-is. */
+  html.dark .app {
+    --paper:       #15120F;   /* app background */
+    --surface:     #1F1B16;   /* panels / cards */
+    --surface-2:   #272019;   /* raised / zebra rows */
+    --paper-line:  #342C22;
+    --line:        #39312A;
+    --ink-warm:    #F0ECE5;   /* primary text */
+    --ink-soft:    #C2BAAE;
+    --ink-mute:    #8C8479;
+    --text-strong: #F6F2EB;
+    --shadow-sm:   0 2px 8px rgba(0,0,0,.35);
+    --shadow-md:   0 14px 40px -18px rgba(0,0,0,.60);
+    --shadow-lg:   0 30px 70px -30px rgba(0,0,0,.72);
+  }
+  /* Light theme — invert page/surface, darken text. */
+  html.light {
+    --color-flush: 248 250 246;    /* near-white page */
+    --color-kale: 255 255 255;     /* surface */
+    --color-ink: 10 31 26;         /* near-black text */
+    --color-ink-muted: 95 115 105; /* slate-ish muted */
+    color-scheme: light;
+  }
+  @media (min-width: 768px) {
+    :root {
+      --nav-h: 56px;
+    }
+  }
+  html {
+    scroll-behavior: smooth;
+    /* Stop sideways scrolling. On iOS Safari a horizontally-scrollable page
+       offsets position:fixed overlays (modals) AND desyncs touch hit-testing
+       from where elements visually sit — so taps on modal buttons miss.
+       clip doesn't create a scroll container (keeps sticky/fixed working);
+       hidden is the fallback for older Safari. */
+    overflow-x: hidden;
+    overflow-x: clip;
+  }
+  body {
+    font-family: "Plus Jakarta Sans", ui-sans-serif, system-ui, sans-serif;
+    background-color: rgb(var(--color-flush));
+    color: rgb(var(--color-ink));
+    overflow-x: hidden;
+    overflow-x: clip;
+    max-width: 100%;
+    /* Stop the iOS rubber-band drag past the end of the page — without
+       this you can pull the content up and rest in empty space below the
+       footer / behind an open modal. Also disables pull-to-refresh. */
+    overscroll-behavior-y: none;
+  }
+  ::selection {
+    background: #2bb673;
+    color: #0a1f1a;
+  }
+
+  /* Chrome paints autofilled (and autofill-previewed) inputs with a yellow
+     or system-tinted background that ignores the input's own bg. Neutralise
+     it so our white-on-dark forms stay legible during the autofill hover
+     preview state. `box-shadow` is the documented hack — Chrome lets you
+     override the inner background via an inset shadow but not via
+     background-color directly. */
+  input:-webkit-autofill,
+  input:-webkit-autofill:hover,
+  input:-webkit-autofill:focus,
+  input:-webkit-autofill:active {
+    -webkit-box-shadow: 0 0 0 1000px #ffffff inset !important;
+    box-shadow: 0 0 0 1000px #ffffff inset !important;
+    -webkit-text-fill-color: #0a1f1a !important;
+    caret-color: #0a1f1a;
+    transition: background-color 9999s ease-in-out 0s;
+  }
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+  .glass {
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0.01));
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+  }
+  .ring-soft {
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.06);
+  }
+}
+
+/* ── Shared State Bank error banner (the design's signup .su-toast). Lives
+   here so login / mfa / signup / future routes can all use the same
+   slide-down top banner without duplicating CSS. ───────────────────── */
+.su-toast {
+  position: fixed; top: 0; left: 0; right: 0; transform: translateY(-100%);
+  background: #B23A3A; color: #fff; padding: 15px 22px;
+  font-size: 14.5px; font-weight: 600;
+  display: flex; align-items: center; justify-content: center; gap: 10px;
+  z-index: 300; transition: transform .4s var(--ease, cubic-bezier(.22,.61,.36,1));
+  text-align: center; box-shadow: var(--shadow-md, 0 14px 40px -18px rgba(30,28,23,.30));
+}
+.su-toast.show { transform: translateY(0); }
+.su-toast svg { width: 18px; height: 18px; flex-shrink: 0; }
+
+/* Standard "← Back" pill — app-wide so auth/marketing pages (outside the
+   dashboard stylesheet) can use the same control. The (app) dashboard also
+   aliases `.view-back` to this in dashboard-sb.css. */
+.back-pill {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 9px 18px 9px 14px;
+  border-radius: 24px;
+  background-color: #ffffff;
+  border: 1px solid var(--line);
+  box-shadow: var(--shadow-sm);
+  font-family: var(--sans); font-size: 15px; font-weight: 700;
+  color: var(--text-strong); cursor: pointer;
+  transition: background .2s, border-color .2s, transform .2s;
+}
+.back-pill svg { width: 18px; height: 18px; color: var(--gold-deep); }
+.back-pill:hover, .back-pill:active {
+  background-color: transparent; border: 1px solid var(--gold);
+  box-shadow: none; transform: translateX(-2px);
+}
+.back-pill:focus { outline: none; box-shadow: none; }
+.back-pill:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
+
+/* ── iOS: no auto-zoom on input focus ────────────────────────────────────
+   Mobile Safari zooms the whole page whenever a focused text field has a
+   font-size < 16px. Force ≥16px on any TOUCH device (and narrow screens) so
+   tapping an input / textarea / select never zooms. `pointer: coarse` is
+   what catches the gap a width breakpoint misses: phones in landscape
+   (≥881px wide) and tablets. Unlayered + !important so it overrides the
+   per-component sizes (.field input, .su-in, .docs-input, Tailwind text-sm,
+   etc.); the intentionally-large fields (amount entry, OTP cells) are
+   re-raised so they keep their size. Mouse-driven desktops are untouched. */
+@media (max-width: 880px), (pointer: coarse) {
+  input, textarea, select { font-size: 16px !important; }
+  .xa-input { font-size: clamp(40px, 8vw, 56px) !important; }
+  .otp-input { font-size: clamp(20px, 6vw, 28px) !important; }
+  .su-otp input { font-size: 26px !important; }
+}

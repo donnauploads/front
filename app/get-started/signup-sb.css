@@ -1,0 +1,589 @@
+@import url("https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,500;1,600&family=Inter:wght@400;500;600;700&display=swap");
+
+/* Central Bahrain Bank signup — ported from design bundle (signup.css).
+   Route-split to /get-started; tokens duplicated here so they resolve
+   without depending on the homepage stylesheet. */
+
+:root {
+  /* Brand palette — charcoal + mustard gold + red accent
+     (was navy/gold in the original handoff; redesign moved to these
+     tokens per the design HANDOFF.md). */
+  --navy:        #2B2926;   /* primary dark (warm charcoal) */
+  --navy-deep:   #1C1A17;   /* near-black bars */
+  --navy-700:    #3D3934;   /* charcoal hover */
+  --gold:        #C9A24A;   /* mustard gold */
+  --gold-soft:   #DCC07E;
+  --gold-deep:   #97793A;   /* bronze */
+  --red:         #B5121B;   /* consumer-protection red */
+  --red-deep:    #8E0E15;
+  --white:       #FFFFFF;
+  --paper:       #F4F1EA;   /* soft warm gray */
+  --paper-line:  #E7E1D3;
+  --ink:         #211F1B;
+  --ink-soft:    #514D45;
+  --ink-mute:    #756F66;
+
+  /* Functional */
+  --line:        #E2DDD0;
+  /* semantic surfaces (remapped in dark theme) */
+  --bg:          #F4F1EA;
+  --surface:     #FFFFFF;
+  --surface-2:   #FBF9F4;
+  --text-strong: #2B2926;
+  --shadow-sm:   0 2px 8px rgba(30,28,23,.07);
+  --shadow-md:   0 14px 40px -18px rgba(30,28,23,.30);
+  --shadow-lg:   0 30px 70px -30px rgba(30,28,23,.42);
+
+  /* Type scale — signup uses Inter for headings too (overrides --serif
+     so wizard h1/h2 land in the same family as body copy). */
+  --serif: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --sans:  "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+
+  /* Rhythm */
+  --maxw: 1280px;
+  --gutter: clamp(20px, 4vw, 64px);
+  --section-y: clamp(64px, 8vw, 120px);
+
+  --ease: cubic-bezier(.22,.61,.36,1);
+}
+
+/* ============================================================
+   Central Bahrain Bank — Sign-up wizard
+   ============================================================ */
+
+/* error/info toast — top, full width */
+.su-toast {
+  position: fixed; top: 0; left: 0; right: 0; transform: translateY(-100%);
+  background: #B23A3A; color: #fff; padding: 15px 22px;
+  font-size: 14.5px; font-weight: 600;
+  display: flex; align-items: center; justify-content: center; gap: 10px;
+  z-index: 300; transition: transform .4s var(--ease);
+  text-align: center; box-shadow: var(--shadow-md);
+}
+.su-toast.show { transform: translateY(0); }
+.su-toast svg { width: 18px; height: 18px; flex-shrink: 0; }
+@keyframes suShake {
+  0%, 100% { transform: translateX(0); }
+  20%, 60% { transform: translateX(-7px); }
+  40%, 80% { transform: translateX(7px); }
+}
+.su-otp.shake { animation: suShake .4s ease; }
+.su-otp.shake input { border-color: #B23A3A; }
+.su-page { min-height: 100vh; min-height: -webkit-fill-available; min-height: 100dvh; background: var(--paper); display: flex; flex-direction: column; }
+/* Left column wrapper holding the wizard. Becomes the form half of the
+   desktop two-panel grid at ≥880px. */
+.su-main { flex: 1; display: flex; flex-direction: column; min-width: 0; }
+/* Brand panel hidden below 880px; the marketing aside on the right at
+   desktop. */
+.su-brand-panel { display: none; }
+.su-top { position: sticky; top: 0; z-index: 10; background: var(--paper); }
+.su-top-inner { max-width: 520px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; gap: 14px; padding: 14px 20px; }
+.su-burger {
+  display: grid; place-items: center; width: 42px; height: 42px;
+  background: transparent; border: 1.5px solid var(--line); border-radius: 12px;
+  color: var(--navy); cursor: pointer;
+  transition: background-color .15s, border-color .15s;
+}
+.su-burger:hover { background: rgba(11,37,69,.04); border-color: var(--navy); }
+.su-burger svg { width: 20px; height: 20px; }
+
+/* ── State Bank-styled marketing drawer (matches homepage nav) ── */
+.sb-drawer-backdrop {
+  position: fixed; inset: 0; z-index: 70; background: rgba(11,37,69,.45);
+  opacity: 0; visibility: hidden; transition: opacity .25s ease, visibility .25s;
+}
+.sb-drawer-backdrop.open { opacity: 1; visibility: visible; }
+.sb-drawer {
+  position: fixed; top: 0; right: 0; bottom: 0; z-index: 80;
+  width: min(86vw, 360px);
+  display: flex; flex-direction: column;
+  background: #fff; box-shadow: -16px 0 40px rgba(11,37,69,.18);
+  transform: translateX(100%); transition: transform .35s cubic-bezier(.2,.7,.2,1);
+}
+.sb-drawer.open { transform: translateX(0); }
+.sb-drawer-head {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 18px 22px; border-bottom: 1px solid var(--line);
+}
+.sb-drawer-title {
+  font-family: var(--serif); font-size: 14px; font-weight: 700;
+  letter-spacing: .22em; text-transform: uppercase; color: var(--gold-deep);
+}
+.sb-drawer-close {
+  display: grid; place-items: center; width: 36px; height: 36px;
+  background: transparent; border: 0; border-radius: 10px;
+  color: var(--navy); cursor: pointer; transition: background-color .15s;
+}
+.sb-drawer-close:hover { background: rgba(11,37,69,.06); }
+.sb-drawer-close svg { width: 20px; height: 20px; }
+.sb-drawer-nav { flex: 1; overflow-y: auto; padding: 8px 0; }
+.sb-drawer-section { border-bottom: 1px solid var(--line); }
+.sb-drawer-row {
+  display: flex; align-items: center; justify-content: space-between;
+  width: 100%; padding: 16px 22px;
+  font-family: var(--serif); font-size: 17px; font-weight: 600;
+  color: var(--navy); background: transparent; border: 0;
+  cursor: pointer; text-align: left;
+  transition: color .15s, background-color .15s;
+}
+.sb-drawer-row:hover { color: var(--gold-deep); background: rgba(201,169,75,.04); }
+.sb-drawer-row.solo { border-bottom: 1px solid var(--line); text-decoration: none; }
+.sb-drawer-chev {
+  width: 16px; height: 16px; color: var(--ink-mute);
+  transition: transform .2s ease;
+}
+.sb-drawer-section.open .sb-drawer-chev { transform: rotate(180deg); color: var(--gold-deep); }
+.sb-drawer-sub {
+  padding: 0 22px 14px 22px; display: flex; flex-direction: column; gap: 2px;
+}
+.sb-drawer-sub-link {
+  display: block; padding: 8px 12px; border-radius: 8px;
+  font-family: var(--sans); font-size: 14px; font-weight: 500;
+  color: var(--ink-soft); text-decoration: none;
+  transition: background-color .15s, color .15s;
+}
+.sb-drawer-sub-link:hover { background: rgba(11,37,69,.05); color: var(--navy); }
+.sb-drawer-foot { padding: 18px 22px; border-top: 1px solid var(--line); }
+.sb-drawer-cta {
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  width: 100%; padding: 13px 18px; border-radius: 10px;
+  background: var(--navy); color: #fff; font-family: var(--sans);
+  font-size: 15px; font-weight: 600; text-decoration: none;
+  transition: background-color .15s, transform .15s;
+}
+.sb-drawer-cta:hover { background: #0a2245; }
+.sb-drawer-cta:active { transform: scale(.98); }
+.sb-drawer-cta svg { width: 16px; height: 16px; }
+
+/* ── Mobile auth header (crest + wordmark + hamburger dropdown) ── */
+.m-authbar { display: none; }
+@media (max-width: 880px) {
+  .m-authbar {
+    display: flex; align-items: center; justify-content: space-between; gap: 12px;
+    position: sticky; top: 0; z-index: 70;
+    background: #fff; padding: 11px 18px;
+    border-bottom: 1px solid var(--line);
+    box-shadow: 0 2px 14px rgba(30,28,23,.08);
+  }
+  /* Scoped to .sb-su (the signup page wrapper) so the rule cannot
+     cascade-collide with the login route's .mab-logo declaration when
+     both stylesheets sit in the document head after client-side nav.
+     The rules here are otherwise identical to what was unscoped. */
+  .sb-su .mab-brand { display: inline-flex; align-items: center; min-width: 0; text-decoration: none; flex: 1; }
+  .sb-su .mab-logo { height: 54px; width: auto; max-width: 100%; display: block; }
+  @media (max-width: 400px) { .sb-su .mab-logo { height: 46px; max-width: 230px; } }
+  .mab-burger {
+    width: 44px; height: 44px; display: flex; flex-direction: column; gap: 5px;
+    align-items: center; justify-content: center; flex-shrink: 0;
+    background: transparent; border: 0; cursor: pointer;
+  }
+  .mab-burger span {
+    width: 24px; height: 2px; background: var(--navy); border-radius: 2px;
+    transition: transform .3s var(--ease), opacity .3s;
+  }
+  .mab-burger.active span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+  .mab-burger.active span:nth-child(2) { opacity: 0; }
+  .mab-burger.active span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+  .mab-menu {
+    position: absolute; top: 100%; right: 12px; left: 12px;
+    background: #fff; border: 1px solid var(--line); border-top: 2px solid var(--gold);
+    box-shadow: var(--shadow-md); padding: 8px; border-radius: 0 0 4px 4px;
+    display: none; flex-direction: column;
+  }
+  .mab-menu.open { display: flex; }
+  .mab-menu a {
+    padding: 13px 14px; font-size: 15px; font-weight: 600; color: var(--ink);
+    border-radius: 3px; text-decoration: none;
+    transition: background .2s, color .2s;
+  }
+  .mab-menu a:hover, .mab-menu a:active { background: var(--paper); color: var(--navy); }
+
+  /* signup: keep the progress bar but drop its now-duplicate crest + wordmark */
+  /* On mobile the only child of .su-top is .su-brandlink (already
+     hidden — .m-authbar is the visible header). With nothing left
+     inside, the empty .su-top container was still adding ~28px of
+     padding between the auth-bar's bottom border and the gold progress
+     bar. Hide it entirely. */
+  .su-top { display: none; }
+  .su-top-inner > .su-brandlink, .su-top-inner > .su-burger { display: none; }
+}
+.su-crest { width: 34px; height: 38px; flex-shrink: 0; }
+.su-brand { font-family: var(--serif); font-size: 16px; font-weight: 600; color: var(--navy); line-height: 1.1; }
+.su-brand small { display: block; font-family: var(--sans); font-size: 8.5px; letter-spacing: .26em; text-transform: uppercase; color: var(--gold-deep); margin-top: 2px; }
+.su-progress { flex: 1; height: 5px; border-radius: 3px; background: var(--paper-line); overflow: hidden; margin-left: 8px; }
+.su-progress span { display: block; height: 100%; background: var(--gold); width: 0; transition: width .4s var(--ease); }
+
+.su-wrap { flex: 1; display: flex; justify-content: center; padding: clamp(8px, 1.4vw, 14px) 20px 60px; }
+.su-card { width: 100%; max-width: 440px; }
+.su-back { display: inline-flex; align-items: center; gap: 7px; font-size: 14px; font-weight: 600; color: var(--ink-soft); margin-bottom: 18px; transition: color .2s; }
+.su-back:hover { color: var(--navy); }
+.su-back svg { width: 17px; height: 17px; }
+.su-back[hidden] { display: none; }
+
+.su-step { display: none; }
+.su-step.active { display: block; animation: suIn .35s var(--ease); }
+@keyframes suIn { from { opacity: 0; transform: translateX(14px); } to { opacity: 1; transform: none; } }
+.su-step h1 { font-family: var(--serif); font-size: clamp(26px, 5vw, 34px); line-height: 1.1; color: var(--navy); }
+.su-step .su-sub { font-size: 15px; color: var(--ink-soft); line-height: 1.5; margin-top: 10px; }
+
+.su-fields { margin-top: 24px; display: flex; flex-direction: column; gap: 12px; }
+.su-in {
+  width: 100%; padding: 11px 14px; font-family: var(--sans); font-size: 15px; color: var(--ink);
+  background: var(--surface); border: 1.5px solid var(--line); border-radius: 8px; outline: none;
+  transition: border-color .2s, box-shadow .2s;
+}
+.su-in::placeholder { color: var(--ink-mute); }
+.su-in:focus { border-color: var(--gold); box-shadow: 0 0 0 4px rgba(201,162,74,.18); }
+.su-in.bad { border-color: #C0392B; box-shadow: 0 0 0 3px rgba(192,57,43,.1); }
+.su-row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+/* Custom select — styled dropdown that caps the open list to ~5 visible
+   options (rest scroll vertically, no horizontal bar) and flips upward
+   when there's no room below. Drives a real value via React state. */
+.cs { position: relative; }
+.cs-btn {
+  width: 100%; display: flex; align-items: center; justify-content: space-between; gap: 10px;
+  padding: 11px 14px; font-family: var(--sans); font-size: 15px; font-weight: 500; color: var(--ink);
+  background: var(--surface); border: 1.5px solid var(--line); border-radius: 8px; cursor: pointer; text-align: left;
+  transition: border-color .2s, box-shadow .2s;
+}
+.cs-btn .cs-val { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.cs-btn.placeholder .cs-val { color: var(--ink-mute); font-weight: 400; }
+.cs.open .cs-btn { border-color: var(--gold); box-shadow: 0 0 0 4px rgba(201,162,74,.18); }
+.cs-btn .cs-chev { width: 16px; height: 16px; color: var(--ink-mute); flex-shrink: 0; transition: transform .25s; }
+.cs.open .cs-btn .cs-chev { transform: rotate(180deg); }
+.cs-pop {
+  position: absolute; top: calc(100% + 6px); left: 0; right: 0; z-index: 30;
+  background: var(--surface); border: 1.5px solid var(--line); border-radius: 8px;
+  box-shadow: var(--shadow-md); padding: 6px; overflow-y: auto; overflow-x: hidden;
+  max-height: 244px; /* ~5 rows */
+  opacity: 0; visibility: hidden; transform: translateY(-6px); transition: opacity .2s, transform .2s var(--ease);
+  scrollbar-width: thin; scrollbar-color: var(--paper-line) transparent;
+  overscroll-behavior: contain;
+}
+.cs.open .cs-pop { opacity: 1; visibility: visible; transform: none; }
+.cs.up .cs-pop { top: auto; bottom: calc(100% + 6px); }      /* open upward */
+.cs.up.open .cs-pop { transform: none; }
+.cs-pop::-webkit-scrollbar { width: 8px; height: 0; }
+.cs-pop::-webkit-scrollbar-thumb { background: var(--paper-line); border-radius: 8px; }
+.cs-pop::-webkit-scrollbar-track { background: transparent; }
+.cs-opt {
+  width: 100%; text-align: left; padding: 13px 14px; border-radius: 8px; cursor: pointer;
+  font-size: 15.5px; font-weight: 500; color: var(--ink);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis; transition: background .15s;
+}
+.cs-opt:hover { background: var(--paper); }
+.cs-opt.sel { background: rgba(201,162,74,.14); color: var(--gold-deep); font-weight: 600; }
+
+/* Phone input with leading country chip + tabular formatting */
+.su-phone {
+  display: flex; align-items: stretch; width: 100%;
+  background: var(--surface); border: 1.5px solid var(--line); border-radius: 8px;
+  transition: border-color .2s, box-shadow .2s; overflow: hidden;
+}
+.su-phone:focus-within { border-color: var(--gold); box-shadow: 0 0 0 4px rgba(201,162,74,.18); }
+.su-phone.bad { border-color: #C0392B; box-shadow: 0 0 0 3px rgba(192,57,43,.1); }
+.su-phone-cc {
+  display: flex; align-items: center; gap: 6px;
+  padding: 0 14px; font-family: var(--sans); font-size: 15px; font-weight: 600;
+  color: var(--ink); background: var(--paper);
+  border-right: 1.5px solid var(--line); user-select: none; flex-shrink: 0;
+}
+.su-phone-cc .flag { font-size: 18px; line-height: 1; }
+.su-phone-in {
+  flex: 1; min-width: 0; padding: 11px 14px;
+  font-family: var(--sans); font-size: 15px; font-weight: 500;
+  letter-spacing: 0.01em; font-variant-numeric: tabular-nums;
+  color: var(--ink); background: transparent; border: 0; outline: none;
+}
+.su-phone-in::placeholder { color: var(--ink-mute); font-weight: 400; letter-spacing: 0; }
+
+.su-phone-wrap { position: relative; }
+.su-phone-cc { cursor: pointer; transition: background-color .15s; }
+.su-phone-cc:hover { background: rgba(11,37,69,.04); }
+.su-phone-chev { width: 14px; height: 14px; color: var(--ink-mute); flex-shrink: 0; margin-left: 2px; }
+
+.su-phone-pop {
+  position: absolute; left: 0; bottom: calc(100% + 6px); z-index: 30;
+  width: 100%; max-width: 100%; box-sizing: border-box;
+  background: var(--surface); border: 1.5px solid var(--line); border-radius: 12px;
+  box-shadow: 0 12px 32px rgba(11,37,69,.12); overflow: hidden;
+}
+.su-phone-search {
+  display: flex; align-items: center; gap: 8px; padding: 8px 10px;
+  border-bottom: 1px solid var(--line); background: var(--paper);
+}
+.su-phone-search-ic { width: 14px; height: 14px; color: var(--ink-mute); flex-shrink: 0; }
+.su-phone-search input {
+  flex: 1; min-width: 0; background: transparent; border: 0; outline: none;
+  font-family: var(--sans); font-size: 14px; color: var(--ink);
+}
+.su-phone-search input::placeholder { color: var(--ink-mute); }
+.su-phone-list { max-height: 200px; overflow-y: auto; overscroll-behavior: contain; }
+.su-phone-opt {
+  display: grid; grid-template-columns: 22px 1fr auto; align-items: center; gap: 8px;
+  width: 100%; padding: 7px 12px; background: transparent; border: 0;
+  cursor: pointer; text-align: left; font-family: var(--sans);
+}
+.su-phone-opt:hover { background: rgba(11,37,69,.04); }
+.su-phone-opt.selected { background: rgba(11,37,69,.06); }
+.su-phone-opt .flag { font-size: 16px; line-height: 1; }
+.su-phone-opt .name {
+  font-size: 13px; color: var(--ink); min-width: 0;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.su-phone-opt .dial {
+  font-size: 12px; color: var(--ink-mute); font-variant-numeric: tabular-nums;
+  flex-shrink: 0;
+}
+.su-phone-empty { padding: 14px; text-align: center; color: var(--ink-mute); font-size: 13px; }
+select.su-in { appearance: none; -webkit-appearance: none; cursor: pointer; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%236B7480' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 16px center; padding-right: 42px; color: var(--ink); }
+select.su-in.placeholder { color: var(--ink-mute); }
+
+.su-legal { font-size: 13px; color: var(--ink-mute); margin-top: 18px; }
+.su-legal a { color: var(--gold-deep); font-weight: 600; text-decoration: underline; }
+
+/* Matches the sign-in primary (.btn.btn-navy.btn-login) for a clean
+   shared look across auth flows. Same padding (13px), font-size (15px),
+   border-radius (8px), navy bg → navy-700 hover, lift + shadow on hover,
+   subtle scale on click, arrow translate when an .arrow SVG is present.
+   Loading state continues to use the existing <span class="su-spin"> the
+   wizard renders during in-flight submits. */
+.su-btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 10px;
+  width: 100%; margin-top: 24px;
+  padding: 13px; border-radius: 8px;
+  background: var(--navy); color: #fff;
+  font-family: var(--sans); font-size: 15px; font-weight: 600;
+  letter-spacing: .01em; cursor: pointer; border: 0;
+  transition: transform .35s var(--ease), background .25s, color .25s, box-shadow .35s var(--ease);
+}
+.su-btn .arrow { transition: transform .35s var(--ease); }
+.su-btn:hover:not(:disabled) {
+  background: var(--navy-700); transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+.su-btn:hover:not(:disabled) .arrow { transform: translateX(4px); }
+.su-btn:active:not(:disabled) { transform: scale(.98); }
+.su-btn:disabled { background: var(--paper-line); color: var(--ink-mute); cursor: not-allowed; }
+.su-btn.gold { background: var(--gold); color: var(--navy-deep); }
+.su-btn.gold:hover:not(:disabled) { background: var(--gold-soft); }
+
+/* channel choice */
+.su-choice { display: flex; flex-direction: column; gap: 12px; margin-top: 24px; }
+.su-opt { display: flex; align-items: center; gap: 15px; width: 100%; text-align: left; padding: 18px; background: var(--surface); border: 1.5px solid var(--line); border-radius: 14px; cursor: pointer; transition: border-color .2s; }
+.su-opt:hover { border-color: var(--gold-soft); }
+.su-opt.selected { border-color: var(--navy); border-width: 2px; }
+.su-opt .o-ic { width: 50px; height: 50px; border-radius: 50%; flex-shrink: 0; display: flex; align-items: center; justify-content: center; background: var(--paper); color: var(--ink-soft); transition: background .2s, color .2s; }
+.su-opt.selected .o-ic { background: var(--navy); color: #fff; }
+.su-opt .o-ic svg { width: 22px; height: 22px; }
+.su-opt .o-body { flex: 1; min-width: 0; }
+.su-opt .o-t { font-size: 17px; font-weight: 600; color: var(--navy); }
+.su-opt .o-s { font-size: 14px; color: var(--ink-mute); margin-top: 2px; font-family: ui-monospace, Menlo, monospace; }
+.su-opt .o-radio { width: 24px; height: 24px; border-radius: 50%; border: 2px solid var(--line); flex-shrink: 0; display: flex; align-items: center; justify-content: center; color: #fff; }
+.su-opt.selected .o-radio { background: var(--navy); border-color: var(--navy); }
+.su-opt .o-radio svg { width: 14px; height: 14px; opacity: 0; }
+.su-opt.selected .o-radio svg { opacity: 1; }
+.su-hint { font-size: 13.5px; color: var(--ink-mute); margin-top: 16px; }
+
+/* OTP */
+.su-ic-badge { width: 56px; height: 56px; border-radius: 50%; background: rgba(201,169,97,.18); color: var(--gold-deep); display: flex; align-items: center; justify-content: center; margin-bottom: 18px; }
+.su-ic-badge svg { width: 26px; height: 26px; }
+.su-otp { display: flex; align-items: center; gap: 9px; margin: 22px 0 6px; }
+.su-otp input { flex: 1; min-width: 0; aspect-ratio: .85; text-align: center; font-size: 26px; font-weight: 700; color: var(--navy); background: var(--surface); border: 1.5px solid var(--line); border-radius: 12px; outline: none; transition: border-color .2s, box-shadow .2s; -moz-appearance: textfield; }
+.su-otp input::-webkit-outer-spin-button, .su-otp input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+.su-otp input:focus { border-color: var(--gold); box-shadow: 0 0 0 4px rgba(201,162,74,.18); }
+.su-otp input.filled { border-color: var(--gold-deep); }
+.su-otp .dash { color: var(--ink-mute); font-size: 22px; }
+.su-resend { display: inline-block; margin-top: 14px; padding: 10px 18px; border-radius: 8px; background: var(--paper-line); color: var(--ink-mute); font-size: 14px; font-weight: 600; }
+.su-resend:enabled { background: var(--surface); border: 1px solid var(--line); color: var(--navy); cursor: pointer; }
+.su-altway { display: block; margin-top: 16px; font-size: 14px; font-weight: 600; color: var(--navy); }
+
+/* password requirements */
+.su-reqs { list-style: none; padding: 0 0 0 16px; margin: 20px 0 0; display: flex; flex-direction: column; gap: 12px; }
+.su-reqs li { display: flex; align-items: center; gap: 11px; font-size: 14.5px; color: var(--ink-mute); transition: color .2s; }
+.su-reqs li svg { width: 19px; height: 19px; color: var(--paper-line); flex-shrink: 0; transition: color .2s; }
+.su-reqs li.ok { color: var(--ink); }
+.su-reqs li.ok svg { color: #2F855A; }
+.su-pass-wrap { position: relative; }
+.su-pass-wrap .su-in { padding-right: 48px; }
+.su-eye { position: absolute; right: 14px; top: 50%; transform: translateY(-50%); width: 22px; height: 22px; color: var(--ink-mute); cursor: pointer; }
+
+/* secure note */
+.su-secure { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--ink-mute); margin-top: 14px; }
+.su-secure svg { width: 15px; height: 15px; color: var(--gold-deep); flex-shrink: 0; }
+.su-auth { margin-top: 18px; }
+.su-auth h4 { font-size: 14px; font-weight: 700; color: var(--ink); line-height: 1.4; margin-bottom: 8px; }
+.su-auth p { font-size: 13px; color: var(--ink-mute); line-height: 1.55; margin-bottom: 10px; }
+
+/* upload tiles */
+.su-uploads { display: flex; flex-direction: column; gap: 12px; margin-top: 22px; }
+.su-up { display: flex; align-items: center; gap: 14px; width: 100%; text-align: left; padding: 16px; background: var(--surface); border: 1.5px solid var(--line); border-radius: 14px; cursor: pointer; transition: border-color .2s; }
+.su-up:hover { border-color: var(--gold-soft); }
+.su-up.done { border-color: var(--navy); }
+.su-up .u-ic { width: 46px; height: 46px; border-radius: 12px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; background: var(--paper); color: var(--ink-soft); overflow: hidden; }
+.su-up .u-ic img { width: 100%; height: 100%; object-fit: cover; }
+.su-up .u-ic svg { width: 20px; height: 20px; }
+.su-up .u-body { flex: 1; min-width: 0; }
+.su-up .u-t { display: block; font-size: 15.5px; font-weight: 600; color: var(--navy); }
+.su-up .u-s { display: block; font-size: 12.5px; color: var(--ink-mute); margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.su-up.done .u-s { color: #2F855A; font-weight: 600; }
+.su-up .u-act { display: flex; gap: 8px; flex-shrink: 0; }
+.su-up .u-act button { width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; background: var(--paper); color: var(--ink-mute); transition: background .2s, color .2s; }
+.su-up .u-act button:hover { background: var(--paper-line); color: var(--navy); }
+.su-up .u-act button svg { width: 15px; height: 15px; }
+
+/* doc-type sheet (reuses sheet pattern) */
+.su-sheet-scrim { position: fixed; inset: 0; background: rgba(7,16,28,.55); z-index: 100; opacity: 0; visibility: hidden; transition: opacity .3s; }
+.su-sheet-scrim.show { opacity: 1; visibility: visible; }
+.su-sheet { position: fixed; left: 50%; bottom: 0; transform: translateX(-50%) translateY(100%); width: min(520px, 100vw); max-height: 88vh; background: var(--surface); border-radius: 18px 18px 0 0; z-index: 101; transition: transform .4s var(--ease); overflow: hidden; display: flex; flex-direction: column; }
+.su-sheet.open { transform: translateX(-50%) translateY(0); }
+.su-sheet-handle { width: 44px; height: 5px; border-radius: 3px; background: var(--paper-line); margin: 12px auto 4px; flex-shrink: 0; }
+.su-sheet-head { display: flex; align-items: flex-start; justify-content: space-between; padding: 10px 22px 6px; }
+.su-sheet-head h3 { font-family: var(--serif); font-size: 22px; color: var(--navy); }
+.su-sheet-head p { font-size: 13.5px; color: var(--ink-mute); margin-top: 4px; }
+.su-sheet-close { width: 36px; height: 36px; border-radius: 50%; flex-shrink: 0; background: var(--paper); color: var(--ink-soft); display: flex; align-items: center; justify-content: center; }
+.su-sheet-close svg { width: 18px; height: 18px; }
+.su-sheet-list { padding: 10px 22px 28px; overflow-y: auto; }
+.su-dt { display: flex; align-items: center; justify-content: space-between; width: 100%; text-align: left; padding: 16px 4px; border-bottom: 1px solid var(--line); font-size: 16px; font-weight: 600; color: var(--ink); }
+.su-dt:last-child { border-bottom: none; }
+.su-dt svg { width: 16px; height: 16px; color: var(--ink-mute); }
+
+/* success */
+.su-success { text-align: center; padding-top: 20px; }
+.su-success .su-check { width: 92px; height: 92px; border-radius: 50%; background: rgba(201,169,97,.18); color: var(--gold-deep); display: flex; align-items: center; justify-content: center; margin: 0 auto 24px; animation: popCheck .5s var(--ease); }
+.su-success .su-check svg { width: 46px; height: 46px; }
+.su-success h1 { font-family: var(--serif); font-size: clamp(28px, 5vw, 36px); color: var(--navy); }
+.su-success p { font-size: 15.5px; color: var(--ink-soft); line-height: 1.6; margin: 16px auto 0; max-width: 42ch; }
+.su-success p b { color: var(--navy); }
+.su-mailbox { background: var(--paper); border: 1px solid var(--paper-line); border-radius: 12px; padding: 16px 18px; margin: 24px 0 0; font-size: 14px; color: var(--ink-soft); display: flex; gap: 11px; align-items: flex-start; text-align: left; }
+.su-mailbox svg { width: 20px; height: 20px; color: var(--gold-deep); flex-shrink: 0; margin-top: 1px; }
+@keyframes popCheck { 0% { transform: scale(.5); opacity: 0; } 60% { transform: scale(1.08); } 100% { transform: scale(1); opacity: 1; } }
+
+/* Base rules the design inherited from styles.css (global reset + fonts).
+   Scoped to the signup wrapper so they can't leak into the rest of the app. */
+.su-page { font-family: var(--sans); color: var(--ink); -webkit-font-smoothing: antialiased; }
+.su-page, .su-page *, .su-page *::before, .su-page *::after { box-sizing: border-box; }
+:where(.su-page) h1, :where(.su-page) h2, :where(.su-page) h3, :where(.su-page) h4 { margin: 0; }
+:where(.su-page) p { margin: 0; }
+:where(.su-page) button { font-family: inherit; cursor: pointer; border: none; background: none; }
+.su-spin { display: inline-block; width: 22px; height: 22px; border-radius: 50%; border: 2px solid rgba(255,255,255,.35); border-top-color: #fff; animation: suSpin .7s linear infinite; }
+@keyframes suSpin { to { transform: rotate(360deg); } }
+
+.su-err { font-size: 13px; color: #C0392B; margin-top: 4px; }
+
+/* Progress bar relocated above the step content (full width, in-card). */
+.su-progress-top { flex: none; width: 100%; margin: 0 0 26px; height: 6px; }
+
+/* ============== PRIVACY POLICY MODAL ============== */
+.legal-scrim { position: fixed; inset: 0; background: rgba(7,16,28,.55); z-index: 200; opacity: 0; visibility: hidden; transition: opacity .3s; backdrop-filter: blur(3px); }
+.legal-scrim.show { opacity: 1; visibility: visible; }
+.legal-modal {
+  position: fixed; top: 50%; left: 50%; transform: translate(-50%, -48%) scale(.98);
+  width: min(560px, calc(100vw - 28px)); max-height: 88vh; display: flex; flex-direction: column;
+  background: var(--surface); border-radius: 16px; box-shadow: var(--shadow-lg); z-index: 201;
+  opacity: 0; visibility: hidden; transition: opacity .3s, transform .3s var(--ease);
+}
+.legal-modal.open { opacity: 1; visibility: visible; transform: translate(-50%, -50%) scale(1); }
+.legal-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; padding: 24px 26px 16px; border-bottom: 1px solid var(--line); }
+.legal-kicker { font-size: 11px; font-weight: 700; letter-spacing: .18em; text-transform: uppercase; color: var(--gold-deep); }
+.legal-head h3 { font-family: var(--serif); font-size: 26px; font-weight: 600; color: var(--navy); margin-top: 5px; white-space: nowrap; }
+.legal-close { width: 38px; height: 38px; border-radius: 50%; flex-shrink: 0; display: flex; align-items: center; justify-content: center; background: var(--paper); color: var(--ink-soft); transition: background .2s, color .2s; }
+.legal-close:hover { background: var(--paper-line); color: var(--navy); }
+.legal-close svg { width: 18px; height: 18px; }
+.legal-body { padding: 20px 26px; overflow-y: auto; -webkit-overflow-scrolling: touch; }
+.legal-body p { font-size: 14.5px; line-height: 1.62; color: var(--ink-soft); margin-bottom: 15px; }
+.legal-body p:last-child { margin-bottom: 0; }
+.legal-body a { color: var(--gold-deep); font-weight: 600; }
+.legal-updated { font-size: 12.5px; color: var(--ink-mute); font-style: italic; padding-top: 6px; border-top: 1px solid var(--line); }
+.legal-foot { padding: 16px 26px 22px; border-top: 1px solid var(--line); }
+
+.legal-modal, .legal-modal * { box-sizing: border-box; }
+.legal-modal { font-family: var(--sans); }
+
+/* Signup brand header — desktop uses the real State Bank logo (replaces the
+   prior inline SVG crest + wordmark). The official logo PNG already
+   contains the Arabic wordmark, so we no longer render a sibling
+   brandtext span. Mobile is covered by .m-authbar / .mab-logo below. */
+.su-top-inner { gap: 16px; padding: 16px clamp(20px, 4vw, 56px); max-width: 100%; margin: 0; justify-content: flex-start; }
+.su-brandlink { display: inline-flex; align-items: center; }
+.su-logo { height: 72px; width: auto; max-width: 360px; display: block; }
+@media (max-width: 600px) { .su-logo { height: 58px; max-width: 280px; } }
+@media (max-width: 400px) { .su-logo { height: 50px; max-width: 230px; } }
+
+/* Password show/hide toggle button (positioned like the design's .su-eye). */
+.su-eye-btn { position: absolute; right: 14px; top: 50%; transform: translateY(-50%); width: 22px; height: 22px; color: var(--ink-mute); display: flex; align-items: center; justify-content: center; }
+.su-eye-btn:hover { color: var(--navy); }
+.su-eye-btn svg { width: 22px; height: 22px; }
+
+/* Doc-type sheet renders at document root (fixed) — give it the base font + box model. */
+.su-sheet, .su-sheet * { box-sizing: border-box; }
+.su-sheet { font-family: var(--sans); }
+
+/* ─────────────────────────────────────────────────────────────────────
+   Desktop two-panel layout (form LEFT, brand panel RIGHT).
+   Mirrors login but with sides inverted. Below 880px the page stays the
+   single-column wizard rendered above; this block only activates at the
+   wider breakpoint.
+   ───────────────────────────────────────────────────────────────────── */
+@media (min-width: 880px) {
+  .su-page { display: grid; grid-template-columns: 1fr 1.05fr; min-height: 100vh; min-height: 100dvh; }
+  .su-main { min-height: 100vh; min-height: 100dvh; overflow-y: auto; }
+  .su-top { position: static; }
+  .su-top-inner { max-width: 440px; padding: 16px 20px; }
+  .su-top-inner .su-logo { display: none; } /* logo lives in brand panel */
+  .su-progress { margin-left: 0; }
+
+  .su-brand-panel {
+    position: relative; overflow: hidden;
+    background: var(--navy-deep); color: #fff;
+    padding: clamp(40px, 5vw, 72px);
+    display: flex; flex-direction: column; justify-content: space-between;
+    animation: suBrandIn .6s var(--ease) both;
+  }
+  .su-brand-panel * { box-sizing: border-box; }
+  .su-brand-panel .lb-sky {
+    position: absolute; inset: 0;
+    background:
+      radial-gradient(120% 90% at 80% 10%, rgba(201,162,74,.22), transparent 55%),
+      linear-gradient(160deg, #3A3631, #1C1A17);
+  }
+  .su-brand-panel .lb-cols {
+    position: absolute; right: -5%; top: 0; bottom: 0; width: 60%;
+    background-image: repeating-linear-gradient(90deg, transparent 0 44px, rgba(201,162,74,.10) 44px 46px);
+    mask-image: linear-gradient(90deg, transparent, #000 30%);
+    -webkit-mask-image: linear-gradient(90deg, transparent, #000 30%);
+  }
+  .su-brand-panel > * { position: relative; z-index: 2; }
+  .su-brand-panel .lb-top { align-self: flex-start; }
+  .su-brand-panel .lb-top .lb-logo {
+    height: 44px; width: auto; background: #fff;
+    padding: 10px 16px; border-radius: 9px; box-sizing: content-box;
+  }
+  .su-brand-panel h1 {
+    font-family: var(--serif); font-weight: 800;
+    font-size: clamp(30px, 3.2vw, 46px); line-height: 1.1;
+    max-width: 15ch; letter-spacing: -.01em; color: #fff;
+  }
+  .su-brand-panel h1 .it { color: var(--gold-soft); }
+  .su-brand-panel .lb-lede {
+    color: rgba(255,255,255,.78); font-size: 17px;
+    margin-top: 18px; max-width: 40ch; line-height: 1.6;
+  }
+  .su-brand-panel .lb-foot { font-size: 13px; color: rgba(255,255,255,.5); }
+  .su-brand-panel .lb-secure {
+    display: inline-flex; align-items: center; gap: 8px;
+    color: var(--gold-soft); font-size: 13.5px; font-weight: 600;
+  }
+}
+@keyframes suBrandIn {
+  from { opacity: 0; transform: translateX(24px); }
+  to   { opacity: 1; transform: none; }
+}
+
+/* Center the "See legal disclosures" line and the new "Already bank with
+   us? Log in" CTA under the Name step's Continue button. */
+.su-legal { text-align: center; }
+.su-signin { text-align: center; font-size: 14.5px; color: var(--ink-soft); margin-top: 16px; }
+.su-signin a { color: var(--gold-deep); font-weight: 700; }
+.su-signin a:hover { text-decoration: underline; }

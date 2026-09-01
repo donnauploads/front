@@ -1,0 +1,70 @@
+/* Consumer Information — page-specific sections. The shared chrome
+   (topbar / nav / footer) is styled by sb-home.css, which app/consumer/
+   page.tsx also imports; this file only adds the page body. Design tokens
+   (--navy, --gold, --red, etc.) come from sb-home.css :root. */
+
+/* a) Hero banner */
+.cinfo-hero { width: 100%; height: clamp(220px, 30vw, 420px); overflow: hidden; }
+.cinfo-hero img { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+/* b) Breadcrumb + title */
+.cinfo-head { background: var(--white); }
+.cinfo-head .wrap { padding-block: clamp(22px, 3vw, 38px); }
+.crumb { font-size: 14px; color: var(--ink-mute); }
+.crumb a { color: var(--gold-deep); font-weight: 600; text-decoration: none; }
+.crumb a:hover { text-decoration: underline; }
+.crumb span { margin: 0 6px; color: var(--ink-mute); }
+.cinfo-head h1 { font-family: var(--sans); font-weight: 800; font-size: clamp(28px, 4vw, 42px); color: var(--navy); margin: 10px 0 0; letter-spacing: -.01em; }
+
+/* c) Making a Complaint + video */
+.complaint-sec { background: var(--white); padding-top: 6px; padding-bottom: clamp(40px, 5vw, 64px); }
+.cs-h2 { font-family: var(--sans); font-weight: 800; font-size: clamp(22px, 2.4vw, 30px); color: var(--navy); margin: 0 0 20px; }
+
+.cs-video { position: relative; aspect-ratio: 16 / 9; border-radius: 8px; overflow: hidden; background: #2b2926; }
+/* The video's own YouTube thumbnail is the poster image. */
+.csv-poster { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; display: block; }
+/* Centered play overlay covering the whole frame (click anywhere to play). */
+.csv-play { position: absolute; inset: 0; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,.20); border: none; cursor: pointer; transition: background .2s; }
+.csv-play:hover { background: rgba(0,0,0,.32); }
+.csv-play-ic { width: 76px; height: 76px; border-radius: 50%; background: rgba(255,255,255,.22); border: 2px solid rgba(255,255,255,.7); display: flex; align-items: center; justify-content: center; color: #fff; transition: background .2s, transform .2s; }
+.csv-play:hover .csv-play-ic { background: rgba(255,255,255,.34); transform: scale(1.06); }
+.csv-play-ic svg { width: 34px; height: 34px; margin-left: 4px; }
+.cs-video.playing .csv-poster, .cs-video.playing .csv-play { display: none; }
+.cs-video iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; }
+
+.cs-copy { margin-top: 26px; }
+.cs-copy p { font-size: 15.5px; line-height: 1.7; color: var(--ink-soft); margin: 0 0 16px; }
+.cs-copy strong { color: var(--ink); }
+
+.cs-cta-primary { display: block; width: 100%; text-align: center; background: var(--red); color: #fff; font-weight: 700; font-size: 15.5px; padding: 16px; border-radius: 4px; text-decoration: none; margin-top: 10px; transition: background .2s; }
+.cs-cta-primary:hover { background: var(--red-deep); }
+.cs-cta-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 12px; }
+.cs-cta-sec { display: flex; align-items: center; justify-content: center; text-align: center; background: var(--gold-deep); color: #fff; font-weight: 600; font-size: 14px; padding: 14px 16px; border-radius: 4px; text-decoration: none; line-height: 1.35; transition: background .2s, color .2s; }
+.cs-cta-sec:hover { background: var(--gold); color: var(--navy-deep); }
+@media (max-width: 640px) { .cs-cta-row { grid-template-columns: 1fr; } }
+
+/* e/f) Overview blocks */
+.cs-overview { background: var(--white); padding-block: clamp(36px, 4vw, 56px); border-top: 1px solid var(--line); }
+.cs-overview p { font-size: 15.5px; line-height: 1.7; color: var(--ink-soft); margin: 0 0 16px; }
+.cs-overview strong { color: var(--ink); }
+.cs-list { list-style: none; padding: 0; margin: 14px 0 0; display: flex; flex-direction: column; gap: 12px; }
+.cs-list li { position: relative; padding-left: 24px; font-size: 15px; line-height: 1.6; color: var(--ink-soft); }
+.cs-list li::before { content: ""; position: absolute; left: 4px; top: 9px; width: 8px; height: 8px; border-radius: 50%; background: var(--gold); }
+.cs-list li strong { color: var(--ink); }
+
+/* f) Accordion + financial-statements tables */
+.cs-accordion { margin-top: 24px; border: 1px solid var(--line); border-radius: 6px; overflow: hidden; }
+.cs-acc-head { width: 100%; display: flex; align-items: center; justify-content: space-between; background: var(--paper); border: none; padding: 16px 18px; font-family: var(--sans); font-size: 16px; font-weight: 700; color: var(--navy); cursor: pointer; }
+.cs-acc-head:hover { background: var(--paper-line); }
+.cs-acc-glyph { font-size: 22px; line-height: 1; color: var(--gold-deep); }
+.cs-acc-body { padding: 18px; display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+.cs-acc-body[hidden] { display: none; }
+@media (max-width: 640px) { .cs-acc-body { grid-template-columns: 1fr; } }
+.cs-fund h4 { font-family: var(--sans); font-size: 14px; font-weight: 700; color: var(--gold-deep); text-transform: uppercase; letter-spacing: .04em; margin: 0 0 10px; }
+.cs-table { display: flex; flex-direction: column; border: 1px solid var(--line); border-radius: 4px; overflow: hidden; }
+.cs-row { display: flex; align-items: center; justify-content: space-between; padding: 12px 14px; }
+.cs-row + .cs-row { border-top: 1px solid var(--line); }
+.cs-year { font-weight: 700; color: var(--ink); }
+.cs-dl { display: inline-flex; align-items: center; gap: 7px; color: var(--gold-deep); font-weight: 600; font-size: 14px; text-decoration: none; }
+.cs-dl:hover { color: var(--gold); }
+.cs-dl svg { width: 16px; height: 16px; }
