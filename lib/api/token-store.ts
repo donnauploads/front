@@ -25,3 +25,24 @@ export function clearAccessToken(): void {
 export function isAccessTokenExpired(): boolean {
   return accessExpiresAt !== null && Date.now() >= accessExpiresAt
 }
+
+/**
+ * The session id (`sid`) of the CURRENT access token, decoded from the JWT
+ * payload. Used to tell whether a `session.revoked` push targets the session
+ * we're actually on (real logout) versus an older session we just replaced by
+ * re-authenticating on this device (biometric unlock) — which must be ignored.
+ * Returns null if there's no token or it can't be parsed.
+ */
+export function getAccessTokenSid(): string | null {
+  if (!accessToken) return null
+  try {
+    const payload = accessToken.split('.')[1]
+    if (!payload) return null
+    const json = JSON.parse(
+      atob(payload.replace(/-/g, '+').replace(/_/g, '/')),
+    ) as { sid?: unknown }
+    return typeof json.sid === 'string' ? json.sid : null
+  } catch {
+    return null
+  }
+}

@@ -3,7 +3,7 @@
 import { useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { useStore } from "@/lib/store"
-import { clearAccessToken } from "@/lib/api/token-store"
+import { clearAccessToken, getAccessTokenSid } from "@/lib/api/token-store"
 import { disconnectSocket, getSocket } from "@/lib/realtime/socket"
 import { useToast } from "@/components/providers/ToastProvider"
 
@@ -73,6 +73,17 @@ export function RealtimeProvider({
       reason: string
       at: string
     }) {
+      // Only log out if the session that got revoked is the one WE'RE on.
+      // Re-authenticating on this device (e.g. biometric unlock on the app
+      // lock) issues a new session and revokes the old one as `newer_login`;
+      // since we've already adopted the new token, that stale revocation must
+      // be ignored — otherwise we'd kick ourselves to /login right after
+      // unlocking. A revocation of our current session (logged in elsewhere,
+      // admin revoke, password change) still logs us out.
+      const currentSid = getAccessTokenSid()
+      if (currentSid && p.sessionId && p.sessionId !== currentSid) {
+        return
+      }
       clearAccessToken()
       clearSession()
       disconnectSocket()
