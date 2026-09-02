@@ -19,14 +19,19 @@ import {
 } from "@/components/ui/toast-styles"
 
 type Variant = "success" | "info" | "error" | "warning"
+type ToastAction = { label: string; onClick: () => void }
 type ToastItem = {
   id: number
   message: string
   variant: Variant
+  action?: ToastAction
 }
 
 type Ctx = {
-  toast: (msg: string, opts?: { variant?: Variant; duration?: number }) => void
+  toast: (
+    msg: string,
+    opts?: { variant?: Variant; duration?: number; action?: ToastAction },
+  ) => void
 }
 
 const ToastContext = createContext<Ctx | null>(null)
@@ -44,11 +49,17 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
   const [items, setItems] = useState<ToastItem[]>([])
   const idRef = useRef(0)
 
+  const dismiss = useCallback((id: number) => {
+    setItems((arr) => arr.filter((t) => t.id !== id))
+  }, [])
+
   const toast = useCallback<Ctx["toast"]>((message, opts) => {
     const id = ++idRef.current
     const variant = opts?.variant ?? "success"
-    setItems((arr) => [...arr, { id, message, variant }])
-    const duration = opts?.duration ?? 3500
+    const action = opts?.action
+    setItems((arr) => [...arr, { id, message, variant, action }])
+    // Give actionable toasts longer so the user can reach the button.
+    const duration = opts?.duration ?? (action ? 8000 : 3500)
     window.setTimeout(() => {
       setItems((arr) => arr.filter((t) => t.id !== id))
     }, duration)
@@ -57,12 +68,18 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
   return (
     <ToastContext.Provider value={{ toast }}>
       {children}
-      <Stack items={items} />
+      <Stack items={items} onDismiss={dismiss} />
     </ToastContext.Provider>
   )
 }
 
-function Stack({ items }: { items: ToastItem[] }) {
+function Stack({
+  items,
+  onDismiss,
+}: {
+  items: ToastItem[]
+  onDismiss: (id: number) => void
+}) {
   // Portal into <body> so the fixed-positioned stack escapes every
   // ancestor's transform / filter / contain / will-change. Several
   // wrappers in the (app) shell use those properties (the sidebar
@@ -97,7 +114,12 @@ function Stack({ items }: { items: ToastItem[] }) {
               animate={{ y: 0, opacity: 1, scale: 1 }}
               exit={{ y: -10, opacity: 0, scale: 0.96 }}
               transition={{ duration: 0.22, ease: [0.16, 1, 0.3, 1] }}
-              style={TOAST_CARD}
+              style={{
+                ...TOAST_CARD,
+                // The stack is pointerEvents:none; re-enable clicks on a card
+                // that carries an action button.
+                ...(t.action ? { pointerEvents: "auto" } : null),
+              }}
             >
               <span
                 style={{ ...TOAST_BADGE, ...variantStyle }}
@@ -106,6 +128,18 @@ function Stack({ items }: { items: ToastItem[] }) {
                 <Icon width={14} height={14} strokeWidth={3} />
               </span>
               <span style={TOAST_MSG}>{t.message}</span>
+              {t.action && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    t.action?.onClick()
+                    onDismiss(t.id)
+                  }}
+                  style={TOAST_ACTION_BTN}
+                >
+                  {t.action.label}
+                </button>
+              )}
             </motion.div>
           )
         })}
@@ -121,6 +155,19 @@ const ICON_BY_VARIANT = {
   warning: AlertCircle,
   error: AlertCircle,
 } as const
+
+const TOAST_ACTION_BTN: React.CSSProperties = {
+  marginLeft: 10,
+  flexShrink: 0,
+  border: 0,
+  borderRadius: 8,
+  padding: "5px 12px",
+  fontSize: 12.5,
+  fontWeight: 700,
+  cursor: "pointer",
+  background: "var(--navy, #211F1B)",
+  color: "#fff",
+}
 
 /** Stack container — anchored to the TOP of the visible viewport just
  *  below the app's 72px sticky topbar. Bottom placement was hiding

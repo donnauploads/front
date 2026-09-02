@@ -1,9 +1,11 @@
 "use client"
 
 import { useCallback, useEffect, useRef, useState } from "react"
+import { useRouter } from "next/navigation"
 import { AnimatePresence, motion } from "framer-motion"
 import { Fingerprint, Loader2, Lock } from "lucide-react"
 import { useStore } from "@/lib/store"
+import { useToast } from "@/components/providers/ToastProvider"
 import { useResolvedMocks } from "@/lib/dev/use-mocks-flag"
 import {
   getTransactionPinStatus,
@@ -174,6 +176,8 @@ function LockScreen({
   const [busy, setBusy] = useState(false)
   const [err, setErr] = useState<string | null>(null)
   const [showHelp, setShowHelp] = useState(false)
+  const router = useRouter()
+  const { toast } = useToast()
 
   const bioAvailable =
     typeof window !== "undefined" && !!window.PublicKeyCredential
@@ -211,9 +215,22 @@ function LockScreen({
       await signInWithBiometric(tz, email ?? undefined)
       onUnlock()
     } catch (e) {
-      // User cancelling the OS prompt isn't an error worth surfacing.
       const name = (e as { name?: string })?.name
-      if (name !== "NotAllowedError" && name !== "AbortError") {
+      if (name === "NotAllowedError" || name === "AbortError") {
+        // The authenticator offered no usable passkey for THIS device (the OS
+        // fell back to the cross-device QR), or the prompt was dismissed.
+        // Point the user at setting biometrics up on this device.
+        toast("Biometrics isn't set up on this device.", {
+          variant: "info",
+          action: {
+            label: "Set now",
+            onClick: () => {
+              onUnlock() // lift the lock so the setup page is reachable
+              router.push("/profile/security")
+            },
+          },
+        })
+      } else {
         setErr(e instanceof Error ? e.message : "Biometric unlock failed.")
       }
     } finally {
