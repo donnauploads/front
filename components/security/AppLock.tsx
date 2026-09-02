@@ -176,6 +176,9 @@ function LockScreen({
   const [busy, setBusy] = useState(false)
   const [err, setErr] = useState<string | null>(null)
   const [showHelp, setShowHelp] = useState(false)
+  // Set when the user taps "Set now" on the no-biometrics toast: we DON'T lift
+  // the lock, we require the PIN first, then route to biometric setup on unlock.
+  const [pendingSetup, setPendingSetup] = useState(false)
   const router = useRouter()
   const { toast } = useToast()
 
@@ -191,6 +194,9 @@ function LockScreen({
     try {
       await verifyTransactionPin(pin)
       onUnlock()
+      // If the user asked to set up biometrics, take them there now that the
+      // PIN has actually verified — the lock was never bypassed.
+      if (pendingSetup) router.push("/profile/security")
     } catch (e) {
       setErr(
         e instanceof ApiError
@@ -224,10 +230,9 @@ function LockScreen({
           variant: "info",
           action: {
             label: "Set now",
-            onClick: () => {
-              onUnlock() // lift the lock so the setup page is reachable
-              router.push("/profile/security")
-            },
+            // Do NOT bypass the lock. Flag the intent and require the PIN;
+            // we route to setup only after a successful unlock (see submitPin).
+            onClick: () => setPendingSetup(true),
           },
         })
       } else {
@@ -337,8 +342,9 @@ function LockScreen({
               {firstName ? `Welcome back, ${firstName}` : "Welcome back"}
             </div>
             <div className="ms-sub">
-              You&apos;ve been away for a bit. Enter your PIN or use biometrics
-              to continue.
+              {pendingSetup
+                ? "Enter your PIN to continue — we'll take you to biometric setup."
+                : "You've been away for a bit. Enter your PIN or use biometrics to continue."}
             </div>
           </div>
 

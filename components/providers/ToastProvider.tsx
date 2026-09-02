@@ -178,8 +178,10 @@ const TOAST_ACTION_BTN: React.CSSProperties = {
  *  ancestor with transform / contain / will-change can't trap this
  *  fixed positioning to its own bounds.
  *
- *  z-index 1200 puts it above the modal scrim (1000) so toasts fired
- *  from inside a modal still appear over the dim. */
+ *  z-index 2000 keeps toasts above the modal scrim (1000) AND the opaque
+ *  app-lock overlay (1300) — otherwise a toast fired from the lock screen
+ *  (e.g. "Biometrics isn't set up on this device") renders behind it and is
+ *  invisible. */
 const STACK_STYLE: React.CSSProperties = {
   position: "fixed",
   // 72px topbar + 12px gap. We deliberately do NOT add
@@ -188,7 +190,7 @@ const STACK_STYLE: React.CSSProperties = {
   top: 84,
   left: 12,
   right: 12,
-  zIndex: 1200,
+  zIndex: 2000,
   display: "flex",
   flexDirection: "column",
   alignItems: "center",
