@@ -63,6 +63,9 @@ export default function SecurityCenterPage() {
   const [pinEnabled, setPinEnabled] = useState<boolean | null>(null)
   const [totpOpen, setTotpOpen] = useState<"enable" | "disable" | null>(null)
   const [bioBusy, setBioBusy] = useState(false)
+  const [bioEnrollments, setBioEnrollments] = useState<
+    Awaited<ReturnType<typeof listBiometric>> | null
+  >(null)
   const [revokingId, setRevokingId] = useState<string | null>(null)
 
   const flash = useCallback(
@@ -74,14 +77,16 @@ export default function SecurityCenterPage() {
   )
 
   const refresh = useCallback(async () => {
-    const [ov, ss, pin] = await Promise.all([
+    const [ov, ss, pin, bio] = await Promise.all([
       getSecurityOverview(),
       listSessions(),
       getTransactionPinStatus().catch(() => ({ enabled: false })),
+      listBiometric().catch(() => []),
     ])
     setOverview(ov)
     setSessions(ss.filter((s) => !s.revokedAt))
     setPinEnabled(pin.enabled)
+    setBioEnrollments(bio)
   }, [])
 
   useEffect(() => {
@@ -145,6 +150,21 @@ export default function SecurityCenterPage() {
     () => displaySessions?.find((s) => s.current),
     [displaySessions],
   )
+  // Identity of THIS device and whether IT specifically has biometrics enabled.
+  // Biometric enrollment is per-device, so the toggle must reflect this device
+  // — not whether the user has biometrics on *any* device.
+  const currentDeviceId = useMemo(
+    () => current?.device.id ?? displaySessions?.[0]?.device.id ?? null,
+    [current, displaySessions],
+  )
+  const bioThisDevice = useMemo(
+    () =>
+      !!(
+        currentDeviceId &&
+        bioEnrollments?.some((r) => r.deviceId === currentDeviceId)
+      ),
+    [currentDeviceId, bioEnrollments],
+  )
   const lastLoginLabel = useMemo(() => {
     if (!current) return null
     const where =
@@ -179,14 +199,20 @@ export default function SecurityCenterPage() {
     if (!overview || bioBusy) return
     setBioBusy(true)
     try {
-      if (overview.biometricEnrolled) {
-        const rows = await listBiometric()
-        await Promise.all(rows.map((r) => biometricRemove(r.id)))
-        setOverview({ ...overview, biometricEnrolled: false })
+      if (bioThisDevice) {
+        // Remove ONLY this device's enrollment(s) — never other devices'.
+        // (Previously this listed and removed every enrollment for the user,
+        // which silently disabled biometrics on all their other devices.)
+        const mine = (bioEnrollments ?? []).filter(
+          (r) => r.deviceId === currentDeviceId,
+        )
+        await Promise.all(mine.map((r) => biometricRemove(r.id)))
+        setBioEnrollments((prev) =>
+          prev ? prev.filter((r) => r.deviceId !== currentDeviceId) : prev,
+        )
         flash("Biometric off")
       } else {
-        const deviceId =
-          current?.device.id ?? displaySessions?.[0]?.device.id ?? null
+        const deviceId = currentDeviceId
         if (!deviceId) {
           flash("No active session, sign in again first.")
           return
@@ -208,7 +234,8 @@ export default function SecurityCenterPage() {
         if (!rebound) {
           await enrollBiometric(deviceId)
         }
-        setOverview({ ...overview, biometricEnrolled: true })
+        // Reload enrollments so this device now reads as enabled.
+        await refresh().catch(() => {})
         flash("Biometric on")
       }
     } catch (e) {
@@ -235,7 +262,7 @@ export default function SecurityCenterPage() {
     setBioBusy(true)
     try {
       await enrollBiometric(deviceId)
-      setOverview({ ...overview, biometricEnrolled: true })
+      await refresh().catch(() => {})
       flash("Biometric re-set up on this device")
     } catch (e) {
       const msg = friendlyBiometricError(e)
@@ -306,11 +333,11 @@ export default function SecurityCenterPage() {
                 Icon={Fingerprint}
                 title="Biometric sign-in"
                 body="Use Face ID, Touch ID, or Windows Hello on this device."
-                on={overview.biometricEnrolled}
+                on={bioThisDevice}
                 busy={bioBusy}
                 onClick={onToggleBiometric}
               />
-              {overview.biometricEnrolled && (
+              {bioThisDevice && (
                 <button
                   type="button"
                   onClick={onResetBiometric}
