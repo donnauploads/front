@@ -185,19 +185,19 @@ export default function SecurityCenterPage() {
     setBioBusy(true)
     try {
       if (overview.biometricEnrolled) {
-        // Remove ONLY this device's enrollment — never other devices'. (The
-        // display is account-level so the toggle reads ON wherever a synced
-        // passkey works; but turning it OFF here must not wipe the credential
-        // for the user's other devices. A synced credential's single row may
-        // be bound to another device, in which case there's nothing local to
-        // remove — that's fine, it stays enabled elsewhere.)
+        // Biometric is account-level: with a synced passkey (iCloud / Google
+        // Password Manager) the whole account shares ONE credential, and the
+        // backend soft-disables that shared row on remove — which turns
+        // sign-in off on every device that uses it. There is no coherent
+        // "off for just this device" for a synced credential, so OFF disables
+        // biometric for the account (all active enrollments) and the toggle
+        // reads off. Re-enabling from any device restores it everywhere.
         const rows = await listBiometric()
-        const mine = currentDeviceId
-          ? rows.filter((r) => r.deviceId === currentDeviceId)
-          : rows
-        await Promise.all(mine.map((r) => biometricRemove(r.id)))
-        await refresh().catch(() => {})
-        flash(mine.length ? "Biometric off on this device" : "Biometric off")
+        await Promise.all(rows.map((r) => biometricRemove(r.id)))
+        await refresh().catch(() =>
+          setOverview({ ...overview, biometricEnrolled: false }),
+        )
+        flash("Biometric off")
       } else {
         const deviceId = currentDeviceId
         if (!deviceId) {
@@ -318,7 +318,7 @@ export default function SecurityCenterPage() {
               <ToggleRow
                 Icon={Fingerprint}
                 title="Biometric sign-in"
-                body="Use Face ID, Touch ID, or Windows Hello on this device."
+                body="Use Face ID, Touch ID, or Windows Hello to sign in. Works across your devices; turning it off disables it everywhere."
                 on={overview.biometricEnrolled}
                 busy={bioBusy}
                 onClick={onToggleBiometric}
