@@ -1,6 +1,7 @@
 "use client"
 
 import { useEffect, useRef } from "react"
+import { BRAND_NAME } from "@/lib/brand"
 import "../sb-home.css"
 import "./privacy-sb.css"
 
@@ -118,8 +119,8 @@ export default function PrivacyPage() {
       {/* ================= MAIN NAV ================= */}
       <header className="nav" id="nav">
         <div className="wrap">
-          <a className="brand" href="/" aria-label="State Bank home">
-            <img className="brand-logo" src="/lapi.png" alt="State Bank" />
+          <a className="brand" href="/" aria-label={`${BRAND_NAME} home`}>
+            <img className="brand-logo" src="/lapi.png" alt={BRAND_NAME} />
           </a>
           <nav className="nav-links" id="navLinks" aria-label="Primary">
             <a className="btn btn-navy nav-cta" href="/login">
@@ -156,7 +157,7 @@ export default function PrivacyPage() {
       <section className="pp-banner">
         <div className="wrap">
           <span className="pp-eyebrow">Privacy</span>
-          <h1>State Bank U.S. Privacy Notice</h1>
+          <h1>{BRAND_NAME} U.S. Privacy Notice</h1>
           <p className="pp-updated">
             Updated: February 11, 2026 · Effective: February 28, 2026
           </p>
@@ -170,11 +171,11 @@ export default function PrivacyPage() {
           at Collection" details, by clicking{" "}
           <a href="#california-consumers">here.</a> If you're a California
           resident and apply for a job with us, please see our{" "}
-          <a href="#">State Bank Applicant Privacy Notice.</a>
+          <a href="#">{BRAND_NAME} Applicant Privacy Notice.</a>
         </p>
 
         <p className="pp-lead">
-          State Bank understands you may have questions about
+          {BRAND_NAME} understands you may have questions about
           privacy. This Privacy Notice ("Notice") describes the types of
           personal information we collect, how we use the information, with whom
           we may share it, and the choices available to you. We also describe
@@ -183,12 +184,12 @@ export default function PrivacyPage() {
         </p>
 
         <p className="pp-lead">
-          This Privacy Notice applies to State Bank and its
-          affiliates and subsidiaries (collectively, "State Bank," "we" or "us"). To
-          the extent that you obtain products from State Bank Capital, LLC, State Bank
-          Payments, Inc., and State Bank Insurance Services, LLC, they are considered
-          affiliates and/or subsidiaries of State Bank. This
-          Privacy Notice applies to all the products and services offered by State Bank
+          This Privacy Notice applies to {BRAND_NAME} and its
+          affiliates and subsidiaries (collectively, "{BRAND_NAME}," "we" or "us"). To
+          the extent that you obtain products from {BRAND_NAME} Capital, LLC, {BRAND_NAME}
+          Payments, Inc., and {BRAND_NAME} Insurance Services, LLC, they are considered
+          affiliates and/or subsidiaries of {BRAND_NAME}. This
+          Privacy Notice applies to all the products and services offered by {BRAND_NAME}
           (including on our website ("Site") and mobile application ("App"))
           (collectively, the "Services")) to U.S. consumers, except where a
           product or service has a separate privacy notice that does not
@@ -198,12 +199,12 @@ export default function PrivacyPage() {
 
         <ul>
           <li>
-            <strong>State Bank Members:</strong> When you sign up for an account with
-            State Bank, State Bank may collect and use your personal information on behalf of
-            State Bank Partner Bank, N.A. or Stride Bank, N.A. (collectively, State Bank's
+            <strong>{BRAND_NAME} Members:</strong> When you sign up for an account with
+            {BRAND_NAME}, {BRAND_NAME} may collect and use your personal information on behalf of
+            {BRAND_NAME} Partner Bank, N.A. or Stride Bank, N.A. (collectively, {BRAND_NAME}'s
             "Bank Partners") to facilitate the provision of banking services
             pursuant to{" "}
-            <a href="#">The State Bank Partner Bank, N.A. Consumer Privacy Notice</a>{" "}
+            <a href="#">The {BRAND_NAME} Partner Bank, N.A. Consumer Privacy Notice</a>{" "}
             and the <a href="#">Stride Bank, N.A. Consumer Privacy Notice</a> as
             applicable. The personal information processed in such cases is
             subject to our Bank Partners' privacy notices and laws such as
@@ -322,11 +323,11 @@ export default function PrivacyPage() {
               utility bill) and proof of identity documentation (such as a
               marriage document);
             </li>
-            <li>Login credentials for your State Bank account;</li>
+            <li>Login credentials for your {BRAND_NAME} account;</li>
             <li>
               Financial information, including your account number from our Bank
-              Partners, State Bank account transaction history, information about your
-              linked non-State Bank accounts (such as transaction information and
+              Partners, {BRAND_NAME} account transaction history, information about your
+              linked non-{BRAND_NAME} accounts (such as transaction information and
               balances, payroll account information, etc.), and payment card
               information;
             </li>
@@ -358,7 +359,7 @@ export default function PrivacyPage() {
               purchasing or consuming tendencies, and receipts or records of
               purchase or enrollment in products or Services;
             </li>
-            <li>Voice recordings (such as when you call State Bank's member services);</li>
+            <li>Voice recordings (such as when you call {BRAND_NAME}'s member services);</li>
             <li>Social media handles;</li>
             <li>
               Lease or rent information you provide us, such as lease details and
@@ -367,7 +368,7 @@ export default function PrivacyPage() {
             </li>
             <li>
               Information you provide through member services interactions and
-              that you provide about your experience with State Bank, including via
+              that you provide about your experience with {BRAND_NAME}, including via
               questionnaires, surveys, participation in user research or other
               feedback;
             </li>
@@ -376,7 +377,7 @@ export default function PrivacyPage() {
               platforms;
             </li>
             <li>
-              Information provided by marketers and other websites on which State Bank
+              Information provided by marketers and other websites on which {BRAND_NAME}
               advertises;
             </li>
             <li>
@@ -385,7 +386,7 @@ export default function PrivacyPage() {
             </li>
             <li>
               Profile photos and other information you choose to provide for your
-              State Bank profile;
+              {BRAND_NAME} profile;
             </li>
             <li>
               Other information you choose to provide, such as through our
@@ -500,7 +501,7 @@ export default function PrivacyPage() {
             <UL>
               <li>Provide the Services;</li>
               <li>Process and fulfill transactions;</li>
-              <li>Establish and manage State Bank accounts;</li>
+              <li>Establish and manage {BRAND_NAME} accounts;</li>
               <li>Personalize your experience on our Services;</li>
               <li>
                 Remember you and the information you share with the Services
@@ -508,11 +509,11 @@ export default function PrivacyPage() {
               </li>
               <li>
                 Facilitate payroll or other direct deposits (including tax
-                refunds) to your State Bank account;
+                refunds) to your {BRAND_NAME} account;
               </li>
               <li>
                 Facilitate transfers or API connections between external bank
-                accounts and State Bank accounts;
+                accounts and {BRAND_NAME} accounts;
               </li>
               <li>
                 Verify your identity, including to facilitate a name change
@@ -550,7 +551,7 @@ export default function PrivacyPage() {
                 service training;
               </li>
               <li>
-                Collect fees and other amounts owed in connection with your State Bank
+                Collect fees and other amounts owed in connection with your {BRAND_NAME}
                 account;
               </li>
               <li>
@@ -575,7 +576,7 @@ export default function PrivacyPage() {
               </li>
               <li>
                 Comply with and enforce applicable legal requirements, relevant
-                industry standards and State Bank policies;
+                industry standards and {BRAND_NAME} policies;
               </li>
               <li>
                 Develop, maintain, and improve our services by using machine
@@ -583,7 +584,7 @@ export default function PrivacyPage() {
               </li>
               <li>
                 To provide our services using privacy preserving de-identified
-                data. State Bank will not attempt to re-identify de-identified data
+                data. {BRAND_NAME} will not attempt to re-identify de-identified data
                 provided to us if that was not the intended purpose for the data
                 or without providing proper notice to you.
               </li>
@@ -620,7 +621,7 @@ export default function PrivacyPage() {
               technologies. The ad services use this information to show you ads
               that may be tailored to your individual interests. The information
               ad services may collect includes data about your visits to websites
-              that serve State Bank advertisements, such as the pages or ads you view and
+              that serve {BRAND_NAME} advertisements, such as the pages or ads you view and
               the actions you take on the websites or apps. This data collection
               takes place both on our Services and on third-party websites and
               apps that participate in these ad services. This process also helps
@@ -652,10 +653,10 @@ export default function PrivacyPage() {
             information about how we use and share for these purposes.
           </P>
           <P>
-            We may share personal information you provide with other State Bank members
-            (including whether you are a State Bank member, whether you accept payments
-            or direct deposits via State Bank, your profile picture, name, or other
-            information you provide as part of our public State Bank Profile (such as in
+            We may share personal information you provide with other {BRAND_NAME} members
+            (including whether you are a {BRAND_NAME} member, whether you accept payments
+            or direct deposits via {BRAND_NAME}, your profile picture, name, or other
+            information you provide as part of our public {BRAND_NAME} Profile (such as in
             connection with a member referral, use of the PayAnyone service, use
             of SpotMe Boost service, or other social profile you may create).
           </P>
@@ -692,16 +693,16 @@ export default function PrivacyPage() {
             replying "STOP" to promotional texts. These choices do not apply to
             certain informational communications, including certain surveys and
             mandatory service communications. If you decide you do not want to
-            receive push notifications from State Bank, you can use the settings on your
+            receive push notifications from {BRAND_NAME}, you can use the settings on your
             mobile device to turn them off. We also offer push notifications on
             certain web browsers, which can also be turned off on your browser's
             settings.
           </P>
           <P>
             <span className="u">Submitting an opt-out or privacy request</span>.
-            Different states offer different opt-out rights and State Bank makes it easy
+            Different states offer different opt-out rights and {BRAND_NAME} makes it easy
             for you to submit an opt-out or privacy request through the{" "}
-            <a href="#">State Bank Privacy Hub</a>. There, you can submit a variety of
+            <a href="#">{BRAND_NAME} Privacy Hub</a>. There, you can submit a variety of
             opt-outs as required in your state of residence. Simply enter your
             information so we know who you are and the privacy rights applicable to
             your state will be populated. You can also email us at{" "}
@@ -717,14 +718,14 @@ export default function PrivacyPage() {
             . If you live in a state that offers sale, share, or targeted
             advertising opt-out rights, you can make a request to opt out by
             toggling off the "Do not sell or share my personal information" toggle
-            in your State Bank App settings or by submitting a request through the{" "}
-            <a href="#">State Bank Privacy Hub</a>. In addition, if you visit our
+            in your {BRAND_NAME} App settings or by submitting a request through the{" "}
+            <a href="#">{BRAND_NAME} Privacy Hub</a>. In addition, if you visit our
             website, you should also click on our "Do Not Sell or Share" link at
             the bottom of our homepage or use the Global Privacy Control (GPC)
             signal, but these options will only apply to the browser on which
             you've made your request until you clear your cookies. It will not
             change App-related practices or your account settings when you are not
-            signed in to your State Bank account. When we detect a GPC signal, we will
+            signed in to your {BRAND_NAME} account. When we detect a GPC signal, we will
             make reasonable efforts to respect your choices indicated by the GPC
             setting or similar control that is recognized by regulation or
             otherwise widely acknowledged as a valid opt-out preference signal.
@@ -815,7 +816,7 @@ export default function PrivacyPage() {
             parties, including details on the information they may collect about
             you, are subject to the privacy disclosures of these parties, which we
             strongly suggest you review. To the extent any linked online services
-            or third-party features are not owned or controlled by State Bank, we are not
+            or third-party features are not owned or controlled by {BRAND_NAME}, we are not
             responsible for these third parties' information practices.
           </P>
           <P>
@@ -827,7 +828,7 @@ export default function PrivacyPage() {
             that Plaid will collect and use your personal information in accordance
             with Plaid's privacy policy, which is available at{" "}
             <a href="#">https://plaid.com/legal</a>. Additionally, by using the
-            Plaid Services, you acknowledge and agree that State Bank may use your
+            Plaid Services, you acknowledge and agree that {BRAND_NAME} may use your
             personal information obtained from Plaid in accordance with any legally
             permissible purpose described under this Notice.
           </P>
@@ -846,7 +847,7 @@ export default function PrivacyPage() {
           <SubSection id="california-consumers" letter="A." title="California Consumers">
             <P>
               If you are a California resident and apply for a job with us, please
-              see our <a href="#">State Bank Applicant Privacy Notice</a>.
+              see our <a href="#">{BRAND_NAME} Applicant Privacy Notice</a>.
             </P>
             <h4 className="pp-h4">1. Notice of Collection</h4>
             <P>
@@ -944,7 +945,7 @@ export default function PrivacyPage() {
             <P>
               We may use (and may have used during the 12-month period prior to the
               effective date of this Notice) your personal information for the{" "}
-              <a href="#use-purposes">purposes</a> described in our State Bank Privacy
+              <a href="#use-purposes">purposes</a> described in our {BRAND_NAME} Privacy
               Notice and for the following business purposes specified in the CCPA:
             </P>
             <UL>
@@ -1005,12 +1006,12 @@ export default function PrivacyPage() {
               <li>
                 Your family or friends, such as when they provide us with your
                 contact information by choosing to share their phone contacts with
-                State Bank;
+                {BRAND_NAME};
               </li>
               <li>Payment processors;</li>
               <li>
                 External banks (i.e., banks other than our Bank Partners) if you
-                link a non-State Bank bank account;
+                link a non-{BRAND_NAME} bank account;
               </li>
               <li>Credit reporting agencies;</li>
               <li>Our affiliates and subsidiaries;</li>
@@ -1037,9 +1038,9 @@ export default function PrivacyPage() {
               personal information with our Bank Partners, we do so as their
               service provider. The privacy practices of our Bank Partners are
               subject to their privacy notices (see{" "}
-              <a href="#">The State Bank Partner Bank, N.A. Consumer Privacy Notice</a>{" "}
+              <a href="#">The {BRAND_NAME} Partner Bank, N.A. Consumer Privacy Notice</a>{" "}
               and the <a href="#">Stride Consumer Privacy Notice</a>), which we
-              strongly suggest you review. State Bank is not responsible for our Bank
+              strongly suggest you review. {BRAND_NAME} is not responsible for our Bank
               Partners' information practices or privacy notices. We may have
               disclosed the following categories of personal information about you
               for a business purpose to the following categories of third parties:
@@ -1058,7 +1059,7 @@ export default function PrivacyPage() {
                     [
                       [
                         "Identifiers",
-                        "Our Bank Partners, other State Bank users, our marketing partners, and your employer",
+                        `Our Bank Partners, other ${BRAND_NAME} users, our marketing partners, and your employer`,
                       ],
                       [
                         "Additional Data Subject to Cal. Civ. Code § 1798.80 Law",
@@ -1102,7 +1103,7 @@ export default function PrivacyPage() {
               entities; other persons to whom we have a legal obligation to
               disclose personal information (including, for example, in response to
               a duly issued subpoena or search warrant); and other persons to whom
-              you authorize State Bank to disclose your personal information.
+              you authorize {BRAND_NAME} to disclose your personal information.
             </P>
 
             <h4 className="pp-h4">5. California Privacy Rights</h4>
@@ -1186,7 +1187,7 @@ export default function PrivacyPage() {
                 lawful business purposes.
               </li>
               <li>
-                <span className="u">Notice of Financial Incentives</span>. State Bank may
+                <span className="u">Notice of Financial Incentives</span>. {BRAND_NAME} may
                 offer rewards or prizes for participation in certain activities
                 that may be considered a "financial incentive" under California law.
               </li>
@@ -1219,7 +1220,7 @@ export default function PrivacyPage() {
                 . You have the right to opt-out of joint marketing with other
                 financial institutions. If you would like to opt out of joint
                 marketing with other financial institutions by submitting a request
-                through the <a href="#">State Bank Privacy Hub.</a>
+                through the <a href="#">{BRAND_NAME} Privacy Hub.</a>
               </li>
             </UL>
           </SubSection>
@@ -1297,7 +1298,7 @@ export default function PrivacyPage() {
                 : You have the right to opt-out of joint marketing with other
                 financial institutions. If you would like to opt out of joint
                 marketing with other financial institutions by submitting a request
-                through the <a href="#">State Bank Privacy Hub.</a>
+                through the <a href="#">{BRAND_NAME} Privacy Hub.</a>
               </li>
             </UL>
           </SubSection>
@@ -1319,7 +1320,7 @@ export default function PrivacyPage() {
         <Section id="contact" number="X." title="How to Contact Us">
           <P>
             You can update your privacy preferences directly by using the{" "}
-            <a href="#">State Bank Privacy Hub</a> or as otherwise stated under "Your
+            <a href="#">{BRAND_NAME} Privacy Hub</a> or as otherwise stated under "Your
             Choices" in this Notice. You can also submit a request or ask us
             questions about this Privacy Notice by writing to us at{" "}
             <a href="mailto:privacy@cbb.gov.bh">privacy@cbb.gov.bh</a>.
@@ -1344,7 +1345,7 @@ export default function PrivacyPage() {
                   <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z" />
                   <circle cx="12" cy="10" r="3" />
                 </svg>{" "}
-                State Bank
+                {BRAND_NAME}
               </h4>
               <address>
                 Building 96, Road 1702
@@ -1403,7 +1404,7 @@ export default function PrivacyPage() {
         <div className="footer-bottom">
           <div className="wrap">
             <span className="copy">
-              State Bank © 2026 · All rights reserved
+              {BRAND_NAME} © 2026 · All rights reserved
             </span>
           </div>
         </div>

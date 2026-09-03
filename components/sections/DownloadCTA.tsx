@@ -1,6 +1,7 @@
 import Link from "next/link"
 import { Logo } from "@/components/ui/Logo"
 import { Button } from "@/components/ui/Button"
+import { BRAND_NAME } from "@/lib/brand"
 
 export function DownloadCTA() {
   return (
@@ -12,7 +13,7 @@ export function DownloadCTA() {
             <div className="flex flex-col items-center text-center">
               <Logo />
               <h2 className="mt-3 font-display text-2xl font-bold leading-[1.05] tracking-tight text-white sm:mt-4 sm:text-3xl md:text-5xl">
-                Open a State Bank checking
+                Open a {BRAND_NAME} checking
                 <br />
                 account in minutes.
               </h2>
@@ -33,7 +34,7 @@ export function DownloadCTA() {
             <div className="relative flex justify-center lg:justify-end">
               <img
                 src="/mock4.png"
-                alt="State Bank app preview"
+                alt={`${BRAND_NAME} app preview`}
                 loading="lazy"
                 decoding="async"
                 className="w-[150px] object-contain sm:w-[180px] lg:w-[260px]"

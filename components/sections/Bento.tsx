@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from "react"
 import { AnimatePresence, motion } from "framer-motion"
 import { Check, CreditCard, TrendingUp, PiggyBank, Clock, Headphones, Wallet } from "lucide-react"
 import { Button } from "@/components/ui/Button"
+import { BRAND_NAME } from "@/lib/brand"
 
 type Card = {
   id: string
@@ -31,9 +32,9 @@ const cards: Card[] = [
     Icon: CreditCard,
     title: "5% Cash Back",
     bullets: [
-      "5% cash back with State Bank Prime, or 2% with State Bank Plus.",
+      `5% cash back with ${BRAND_NAME} Prime, or 2% with ${BRAND_NAME} Plus.`,
       "Pick a bonus category, gas, groceries, utilities.",
-      "Earn on every tap with the State Bank Card.",
+      `Earn on every tap with the ${BRAND_NAME} Card.`,
     ],
     image: "/b2.jpg",
     visual: CashbackVisual,

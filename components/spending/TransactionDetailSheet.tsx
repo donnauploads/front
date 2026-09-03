@@ -8,6 +8,7 @@ import { AlertOctagon, MapPin, Printer, X } from "lucide-react"
 import { useStore } from "@/lib/store"
 import type { Transaction } from "@/lib/store"
 import { type DisplayCurrency, convertFromBase, currencyDecimals } from "@/lib/currency"
+import { BRAND_NAME } from "@/lib/brand"
 
 /**
  * Transaction Detail — right-side slide-over panel.
@@ -331,7 +332,7 @@ function openTxnReceipt(d: {
 <body onload="setTimeout(function(){try{window.focus();window.print()}catch(e){}},350)">
   <div class="card">
     <div class="head">
-      <div class="brand"><img src="${logo}" alt="State Bank"/></div>
+      <div class="brand"><img src="${logo}" alt="${BRAND_NAME}"/></div>
       <div class="meta"><span class="pill">Receipt</span></div>
     </div>
     <div class="hero">
@@ -346,7 +347,7 @@ function openTxnReceipt(d: {
       ${row("Date", d.date)}
       ${row("Method", d.method)}
     </div>
-    <div class="foot">State Bank &middot; This receipt was generated electronically and is valid without a signature.</div>
+    <div class="foot">${BRAND_NAME} &middot; This receipt was generated electronically and is valid without a signature.</div>
   </div>
 </body></html>`
   const w = window.open("", "_blank", "width=720,height=920")
@@ -632,7 +633,7 @@ function MerchantAvatar({
       // eslint-disable-next-line @next/next/no-img-element
       <img
         src="/lapi.png"
-        alt="State Bank"
+        alt={BRAND_NAME}
         loading="lazy"
         decoding="async"
         onError={() => setLogoOk(false)}

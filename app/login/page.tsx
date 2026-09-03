@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation"
 import { useState, type FormEvent } from "react"
 import { Eye, EyeOff, Fingerprint } from "lucide-react"
 import { cn } from "@/lib/utils"
+import { BRAND_NAME } from "@/lib/brand"
 import { fetchMe, login, signInWithBiometric } from "@/lib/auth/api/auth.real"
 import {
   getCanvasHash,
@@ -158,13 +159,13 @@ export default function LoginPage() {
         <div className="lb-sky" aria-hidden />
         <div className="lb-cols" aria-hidden />
 
-        <Link href="/" className="lb-top" aria-label="State Bank home">
+        <Link href="/" className="lb-top" aria-label={`${BRAND_NAME} home`}>
           {/* White-on-transparent lockup (lp2) sits directly on the dark
               brand panel — no white card behind it. */}
           <img
             className="lb-logo"
             src="/lp2.png"
-            alt="State Bank"
+            alt={BRAND_NAME}
             style={{ background: "transparent", padding: 0, borderRadius: 0, height: 60 }}
           />
         </Link>

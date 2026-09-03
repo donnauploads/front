@@ -13,11 +13,12 @@ import {
   TrendingUp,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
+import { BRAND_NAME } from "@/lib/brand"
 
 const FUNDS = [
   {
     id: "nova-core",
-    name: "State Bank Core",
+    name: `${BRAND_NAME} Core`,
     sub: "Broad U.S. equities, low cost",
     ytd: 12.4,
     risk: "Moderate",
@@ -25,7 +26,7 @@ const FUNDS = [
   },
   {
     id: "nova-income",
-    name: "State Bank Income",
+    name: `${BRAND_NAME} Income`,
     sub: "Investment-grade bonds + treasuries",
     ytd: 4.2,
     risk: "Low",
@@ -33,7 +34,7 @@ const FUNDS = [
   },
   {
     id: "nova-growth",
-    name: "State Bank Growth",
+    name: `${BRAND_NAME} Growth`,
     sub: "Tilted toward innovation + small caps",
     ytd: 21.8,
     risk: "High",
@@ -45,7 +46,7 @@ const HIGHLIGHTS = [
   {
     Icon: ShieldCheck,
     title: "SEC-registered partner",
-    body: "Brokerage services through State Bank Securities, SIPC-protected up to $500k.",
+    body: `Brokerage services through ${BRAND_NAME} Securities, SIPC-protected up to $500k.`,
   },
   {
     Icon: Sparkles,
@@ -155,7 +156,7 @@ export default function InvestPage() {
       {/* Why State Bank Investments */}
       <section className="mt-8">
         <h2 className="mb-3 px-1 font-display text-lg font-bold tracking-tight text-ink">
-          Why State Bank Investments
+          Why {BRAND_NAME} Investments
         </h2>
         <div className="grid gap-3 md:grid-cols-3">
           {HIGHLIGHTS.map(({ Icon, title, body }) => (
@@ -194,7 +195,7 @@ export default function InvestPage() {
       </section>
 
       <div className="mt-6 text-center text-[11px] text-ink-muted">
-        Investing services offered by State Bank Securities LLC, member FINRA / SIPC.
+        Investing services offered by {BRAND_NAME} Securities LLC, member FINRA / SIPC.
       </div>
     </div>
   )

@@ -1,6 +1,7 @@
 "use client"
 import { useEffect, useState } from "react"
 import { Info, X } from "lucide-react"
+import { BRAND_NAME } from "@/lib/brand"
 
 export function DisclosureBar() {
   const [dismissed, setDismissed] = useState(false)
@@ -30,7 +31,7 @@ export function DisclosureBar() {
       <div className="container flex items-center justify-between gap-4 py-3 text-[13px] text-white">
         <div className="flex items-center gap-2">
           <span>
-            State Bank is the central bank and regulator of the
+            {BRAND_NAME} is the central bank and regulator of the
             financial sector in the Kingdom of Bahrain.
           </span>
           <button

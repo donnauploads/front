@@ -10,6 +10,7 @@ import {
 } from "react"
 import { ArrowLeft, Check, Eye, EyeOff, Lock, Mail } from "lucide-react"
 import { cn } from "@/lib/utils"
+import { BRAND_NAME } from "@/lib/brand"
 import { MAuthBar } from "@/components/get-started/MAuthBar"
 import { SuToast, useSuToast } from "@/components/ui/SuToast"
 import {
@@ -299,14 +300,14 @@ export default function ForgotPasswordPage() {
         <Link
           href="/"
           className="lb-top"
-          aria-label="State Bank home"
+          aria-label={`${BRAND_NAME} home`}
         >
           {/* White-on-transparent lockup (lp2) sits directly on the dark
               brand panel — no white card behind it. */}
           <img
             className="lb-logo"
             src="/lp2.png"
-            alt="State Bank"
+            alt={BRAND_NAME}
             style={{ background: "transparent", padding: 0, borderRadius: 0, height: 60 }}
           />
         </Link>
@@ -347,7 +348,7 @@ export default function ForgotPasswordPage() {
             <span className="lc-eyebrow">Password recovery</span>
             <h2>Forgot your password?</h2>
             <p className="lc-sub">
-              Enter the email tied to your State Bank account and
+              Enter the email tied to your {BRAND_NAME} account and
               we&apos;ll send you a 6-digit code to reset it.
             </p>
 

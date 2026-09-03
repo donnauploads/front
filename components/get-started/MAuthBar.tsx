@@ -12,6 +12,7 @@ import Link from "next/link"
 import { MessageCircle } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { GuestChatModal } from "@/components/support/GuestChatModal"
+import { BRAND_NAME } from "@/lib/brand"
 
 export function MAuthBar() {
   const [open, setOpen] = useState(false)
@@ -37,7 +38,7 @@ export function MAuthBar() {
       <Link
         href="/"
         className="mab-brand"
-        aria-label="State Bank home"
+        aria-label={`${BRAND_NAME} home`}
       >
         {/* Mobile header logo — swapped to /lapi.png per the latest
             brand asset drop.
@@ -52,7 +53,7 @@ export function MAuthBar() {
         <img
           className="mab-logo"
           src="/lapi.png"
-          alt="State Bank"
+          alt={BRAND_NAME}
           style={{ maxHeight: 72, width: "auto" }}
         />
       </Link>

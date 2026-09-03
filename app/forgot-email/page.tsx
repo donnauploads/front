@@ -4,6 +4,7 @@ import Link from "next/link"
 import { useState, type FormEvent } from "react"
 import { Logo } from "@/components/ui/Logo"
 import { cn } from "@/lib/utils"
+import { BRAND_NAME } from "@/lib/brand"
 
 export default function ForgotEmailPage() {
   const [phone, setPhone] = useState("")
@@ -45,7 +46,7 @@ export default function ForgotEmailPage() {
           Forgot email address
         </h1>
         <p className="mt-3 text-[17px] leading-relaxed text-ink-dark/85">
-          Tell us the phone number you used to sign up for your State Bank account.
+          Tell us the phone number you used to sign up for your {BRAND_NAME} account.
         </p>
 
         <form onSubmit={onSubmit} className="mt-8 space-y-6">
@@ -84,11 +85,11 @@ export default function ForgotEmailPage() {
         </form>
 
         <div className="mt-16 space-y-4 text-sm leading-relaxed text-ink-dark/70">
-          <p>© 2026 State Bank. All Rights Reserved.</p>
+          <p>© 2026 {BRAND_NAME}. All Rights Reserved.</p>
           <p>
-            Banking Services provided by State Bank Partner Bank, N.A., or Stride
-            Bank, N.A., Members FDIC. The State Bank Visa® Debit Card is issued by
-            State Bank Partner Bank, N.A., or Stride Bank pursuant to a license from
+            Banking Services provided by {BRAND_NAME} Partner Bank, N.A., or Stride
+            Bank, N.A., Members FDIC. The {BRAND_NAME} Visa® Debit Card is issued by
+            {BRAND_NAME} Partner Bank, N.A., or Stride Bank pursuant to a license from
             Visa U.S.A. Inc. and may be used everywhere Visa debit cards are
             accepted. Please see back of your Card for its issuing bank.
           </p>

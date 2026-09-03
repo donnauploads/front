@@ -1,5 +1,6 @@
 import { Check, Lock, Sparkles } from "lucide-react"
 import { Button } from "@/components/ui/Button"
+import { BRAND_NAME } from "@/lib/brand"
 
 export function RewardingSafeguard() {
   return (
@@ -9,7 +10,7 @@ export function RewardingSafeguard() {
           eyebrow={<Sparkles size={16} />}
           eyebrowLabel="Prime"
           title="The most rewarding way to bank."
-          body="Unlock State Bank Prime with qualifying direct deposits and stack 5% cash back, 3.75% APY on Savings, and a credit lift you can actually feel."
+          body={`Unlock ${BRAND_NAME} Prime with qualifying direct deposits and stack 5% cash back, 3.75% APY on Savings, and a credit lift you can actually feel.`}
           visual={
             <div className="relative grid w-full place-items-center">
               <div

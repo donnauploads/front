@@ -11,6 +11,7 @@ import {
 } from "@/lib/savings/api/savings.real"
 import { listNotifications } from "@/lib/notifications/api/notifications.real"
 import { ApiError, NetworkError } from "@/lib/api/errors"
+import { BRAND_NAME } from "@/lib/brand"
 import { useToast } from "@/components/providers/ToastProvider"
 import { ensureSocketConnected } from "@/lib/realtime/socket"
 
@@ -69,7 +70,7 @@ export function DataBootstrap() {
         setAccountsStatus("error")
         const msg =
           err instanceof NetworkError
-            ? "Can't reach State Bank right now."
+            ? `Can't reach ${BRAND_NAME} right now.`
             : err instanceof ApiError
               ? err.message || "Couldn't load accounts."
               : "Couldn't load accounts."

@@ -4,6 +4,7 @@ import Image from "next/image"
 import Link from "next/link"
 import { Check, Award, Smartphone, Star, Newspaper } from "lucide-react"
 import { Button } from "@/components/ui/Button"
+import { BRAND_NAME } from "@/lib/brand"
 
 const bullets = [
   ["Zero-fee everyday banking", "with early paycheck access."],
@@ -113,7 +114,7 @@ export function Hero() {
           <div className="relative flex justify-center md:col-start-2 md:row-span-2 md:row-start-1 md:self-center">
             <Image
               src="/mock3.png"
-              alt="State Bank app preview"
+              alt={`${BRAND_NAME} app preview`}
               width={1400}
               height={2800}
               priority

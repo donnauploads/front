@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react"
 import { useRouter } from "next/navigation"
+import { BRAND_NAME } from "@/lib/brand"
 import {
   ArrowLeft,
   Eye,
@@ -722,7 +723,7 @@ function CardArt({
       className={cn("cardviz", frozen && "frozen")}
     >
       <div className="cv-top">
-        <span className="cv-brand">State Bank</span>
+        <span className="cv-brand">{BRAND_NAME}</span>
         <span className="cv-net">{card.type === "virtual" ? "Virtual" : "Platinum"}</span>
       </div>
       <div className="cv-chip" aria-hidden />

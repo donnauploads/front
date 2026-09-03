@@ -18,6 +18,7 @@ import {
 } from "lucide-react"
 import { CardLinkModal } from "@/components/move/CardLinkModal"
 import { useStore } from "@/lib/store"
+import { BRAND_NAME } from "@/lib/brand"
 import type { LinkedAccount } from "@/lib/store"
 import { cn } from "@/lib/utils"
 import { Toast } from "@/components/ui/Toast"
@@ -267,7 +268,7 @@ export default function LinkedAccountsPage() {
           onClose={() => setLinkOpen(false)}
           onSubmitted={(bank) => {
             setLinkOpen(false)
-            flash(`${bank.name} request sent, waiting for State Bank approval`)
+            flash(`${bank.name} request sent, waiting for ${BRAND_NAME} approval`)
             void refreshList()
           }}
           onVerified={() => {
@@ -283,7 +284,7 @@ export default function LinkedAccountsPage() {
           onClose={() => setCardOpen(false)}
           onSubmitted={(brand) => {
             setCardOpen(false)
-            flash(`${brand} card sent, waiting for State Bank approval`)
+            flash(`${brand} card sent, waiting for ${BRAND_NAME} approval`)
             void refreshList()
           }}
           onVerified={() => {
@@ -825,7 +826,7 @@ function PlaidLinkModal({
             <p className="mt-2 max-w-sm text-sm text-[#8C8578]">
               Your request to link{" "}
               <span className="font-semibold text-[#211E1A]">{bank?.name}</span> is
-              with State Bank's team. We'll email you the moment it's approved, and
+              with {BRAND_NAME}'s team. We'll email you the moment it's approved, and
               the account will then appear in your linked accounts list.
             </p>
             <button
@@ -1166,7 +1167,7 @@ function UnlinkConfirmModal({
     : `Unlink ${target.bank}?`
   const body = isRejected
     ? `This will permanently remove the rejected request from your list. You can submit a new link request at any time.`
-    : `This will stop sharing data with State Bank. You can re-link it again at any time.`
+    : `This will stop sharing data with ${BRAND_NAME}. You can re-link it again at any time.`
   const confirmLabel = isRejected ? "Dismiss" : "Unlink"
 
   async function confirm() {

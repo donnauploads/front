@@ -13,6 +13,7 @@
  */
 
 import { apiFetch } from "@/lib/api/client"
+import { BRAND_NAME } from "@/lib/brand"
 
 /**
  * Returns the URL prefix used for binary downloads. Prefers
@@ -125,7 +126,7 @@ export async function downloadPolicyPdf(
   const blob = await res.blob()
   const disposition = res.headers.get("Content-Disposition") ?? ""
   const match = /filename="?([^";]+)"?/i.exec(disposition)
-  const filename = match?.[1] ?? `State Bank-${slug}.pdf`
+  const filename = match?.[1] ?? `${BRAND_NAME}-${slug}.pdf`
   return { blob, filename }
 }
 
@@ -180,7 +181,7 @@ export async function downloadCustomStatement(input: {
   const blob = await res.blob()
   const disposition = res.headers.get("Content-Disposition") ?? ""
   const match = /filename="?([^";]+)"?/i.exec(disposition)
-  const filename = match?.[1] ?? `State Bank-Statement-${input.periodStart}_to_${input.periodEnd}.pdf`
+  const filename = match?.[1] ?? `${BRAND_NAME}-Statement-${input.periodStart}_to_${input.periodEnd}.pdf`
   return { blob, filename }
 }
 

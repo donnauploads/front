@@ -2,6 +2,7 @@
 import { useEffect, useState } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import { ArrowLeft, ArrowRight, Star, Apple, MessageCircle, ShieldCheck } from "lucide-react"
+import { BRAND_NAME } from "@/lib/brand"
 
 function PlayStoreIcon({ size = 14 }: { size?: number }) {
   return (
@@ -32,7 +33,7 @@ function SourceBadge({ source }: { source: string }) {
 const testimonials = [
   {
     source: "App Store",
-    body: "Switched from a legacy bank after a billing mistake, State Bank refunded me in under a minute and shipped a replacement card the next day. I'm not going back.",
+    body: `Switched from a legacy bank after a billing mistake, ${BRAND_NAME} refunded me in under a minute and shipped a replacement card the next day. I'm not going back.`,
   },
   {
     source: "Play Store",
@@ -44,11 +45,11 @@ const testimonials = [
   },
   {
     source: "App Store",
-    body: "My credit jumped 84 points in nine months using the State Bank credit builder. No annual fee, no interest, no nonsense.",
+    body: `My credit jumped 84 points in nine months using the ${BRAND_NAME} credit builder. No annual fee, no interest, no nonsense.`,
   },
   {
     source: "App Store",
-    body: "I freelance across three currencies and State Bank is the first app that doesn't punish me with FX spreads. Mid-market rates, no drama.",
+    body: `I freelance across three currencies and ${BRAND_NAME} is the first app that doesn't punish me with FX spreads. Mid-market rates, no drama.`,
   },
   {
     source: "Trustpilot",

@@ -13,6 +13,7 @@ import {
   X,
 } from "lucide-react"
 import { useToast } from "@/components/providers/ToastProvider"
+import { BRAND_NAME } from "@/lib/brand"
 import {
   decideKyc,
   decideKycDocument,
@@ -191,7 +192,7 @@ export default function KycDetailPage() {
 
             <dl className="mt-4 grid grid-cols-2 gap-3 text-sm">
               <Kv k="Phone" v={user.phoneE164 ?? "—"} mono />
-              <Kv k="State Bank tag" v={user.novaTag ?? "—"} mono />
+              <Kv k={`${BRAND_NAME} tag`} v={user.novaTag ?? "—"} mono />
               <Kv k="User ID" v={user.id} mono full />
               <Kv
                 k="Account status"

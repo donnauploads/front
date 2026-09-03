@@ -8,6 +8,7 @@ import { demoDeals, type Deal } from "@/lib/fixtures/deals"
 import { useStore } from "@/lib/store"
 import { cn } from "@/lib/utils"
 import { Toast } from "@/components/ui/Toast"
+import { BRAND_NAME } from "@/lib/brand"
 
 export default function DealsTab() {
   return (
@@ -225,7 +226,7 @@ function DealDetailSheet({
                     Add to card
                   </div>
                   <div className="text-[11px] text-ink-muted">
-                    Auto-applies at checkout when you pay with State Bank.
+                    Auto-applies at checkout when you pay with {BRAND_NAME}.
                   </div>
                 </div>
                 <button

@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react"
 import { Info, X } from "lucide-react"
 import { useStore } from "@/lib/store"
+import { BRAND_NAME } from "@/lib/brand"
 
 export function DemoBanner() {
   const dismissed = useStore((s) => s.prefs.demoBannerDismissed)
@@ -22,7 +23,7 @@ export function DemoBanner() {
       <div className="flex items-center gap-2">
         <Info className="h-4 w-4 flex-shrink-0 text-fern" aria-hidden />
         <span>
-          State Bank, the central bank and regulator of the Kingdom of Bahrain.
+          {BRAND_NAME}, the central bank and regulator of the Kingdom of Bahrain.
         </span>
       </div>
       <button

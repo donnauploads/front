@@ -10,6 +10,7 @@ import {
   type FormEvent,
 } from "react"
 import { cn } from "@/lib/utils"
+import { BRAND_NAME } from "@/lib/brand"
 import {
   fetchMe,
   resendMfa,
@@ -184,14 +185,14 @@ function MfaInner() {
         <Link
           href="/"
           className="lb-top"
-          aria-label="State Bank home"
+          aria-label={`${BRAND_NAME} home`}
         >
           {/* White-on-transparent lockup (lp2) sits directly on the dark
               brand panel — no white card behind it. */}
           <img
             className="lb-logo"
             src="/lp2.png"
-            alt="State Bank"
+            alt={BRAND_NAME}
             style={{ background: "transparent", padding: 0, borderRadius: 0, height: 60 }}
           />
         </Link>

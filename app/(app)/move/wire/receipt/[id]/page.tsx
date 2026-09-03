@@ -15,6 +15,7 @@ import {
 } from "lucide-react"
 import { useStore } from "@/lib/store"
 import { cn } from "@/lib/utils"
+import { BRAND_NAME } from "@/lib/brand"
 import {
   getTransfer,
   type TransferDetail,
@@ -210,7 +211,7 @@ export default function WireReceiptPage() {
                 pre-shrinking the wide lockup, so it rendered blurry once
                 scaled up — this matches the sidebar/homepage approach. */}
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/lapi.png" alt="State Bank" />
+            <img src="/lapi.png" alt={BRAND_NAME} />
           </div>
           <div className="rcpt-meta">
             <span className="rcpt-pill">Wire receipt</span>

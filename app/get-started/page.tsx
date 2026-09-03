@@ -12,6 +12,7 @@ import {
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { cn } from "@/lib/utils"
+import { BRAND_NAME } from "@/lib/brand"
 import { MAuthBar } from "@/components/get-started/MAuthBar"
 import { useToast } from "@/components/providers/ToastProvider"
 import { SuToast, useSuToast } from "@/components/ui/SuToast"
@@ -399,14 +400,14 @@ export default function GetStarted() {
           <Link
             href="/"
             className="su-brandlink"
-            aria-label="State Bank home"
+            aria-label={`${BRAND_NAME} home`}
           >
             {/* Real State Bank logo (wordmark + crest baked in). Replaces the
                 inline SVG crest + wordmark to match the redesign. */}
             <img
               className="su-logo"
               src="/brand/sb-logo.png"
-              alt="State Bank"
+              alt={BRAND_NAME}
             />
           </Link>
         </div>
@@ -606,14 +607,14 @@ export default function GetStarted() {
         <Link
           href="/"
           className="lb-top"
-          aria-label="State Bank home"
+          aria-label={`${BRAND_NAME} home`}
         >
           {/* White-on-transparent lockup (lp2) sits directly on the dark
               brand panel — no white card behind it. */}
           <img
             className="lb-logo"
             src="/lp2.png"
-            alt="State Bank"
+            alt={BRAND_NAME}
             style={{ background: "transparent", padding: 0, borderRadius: 0, height: 60 }}
           />
         </Link>
@@ -2065,7 +2066,7 @@ function SsnStep({
         <h4>Authorization to verify your Passport ID</h4>
         <p>
           I authorize the relevant authority to verify and disclose to
-          State Bank, through its service provider, whether
+          {BRAND_NAME}, through its service provider, whether
           the name, passport number and date of birth I have submitted
           match their records. My consent is for a one-time validation
           within the next 90 days.

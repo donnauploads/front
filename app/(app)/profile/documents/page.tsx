@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from "react"
 import { Download, FileText, Loader2, Sparkles } from "lucide-react"
 import { ProfileSubPage } from "@/components/profile/ProfileSubPage"
+import { BRAND_NAME } from "@/lib/brand"
 import { listAccounts } from "@/lib/accounts/api/accounts"
 import type { Account } from "@/lib/store"
 import {
@@ -394,7 +395,7 @@ function StatementsSection() {
 async function downloadStatement(id: string, title: string) {
   try {
     const { url } = await getStatementUrl(id)
-    await downloadFromUrl(url, `State Bank-${title}.pdf`)
+    await downloadFromUrl(url, `${BRAND_NAME}-${title}.pdf`)
   } catch (e) {
     alert((e as Error).message || "Couldn't download statement.")
   }
@@ -443,7 +444,7 @@ function TaxFormsSection() {
 async function downloadTaxForm(id: string, title: string) {
   try {
     const { url } = await getTaxFormUrl(id)
-    await downloadFromUrl(url, `State Bank-${title}.pdf`)
+    await downloadFromUrl(url, `${BRAND_NAME}-${title}.pdf`)
   } catch (e) {
     alert((e as Error).message || "Couldn't download tax form.")
   }

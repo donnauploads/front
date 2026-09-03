@@ -1,4 +1,5 @@
 import { Logo } from "@/components/ui/Logo"
+import { BRAND_NAME } from "@/lib/brand"
 
 export function Members() {
   return (
@@ -10,13 +11,13 @@ export function Members() {
         <div className="overflow-hidden rounded-3xl">
           <img
             src="/members.jpg"
-            alt="State Bank members"
+            alt={`${BRAND_NAME} members`}
             className="block w-full object-cover"
           />
         </div>
         <div className="mx-auto mt-3 max-w-2xl md:mt-4">
           <div className="text-xs font-bold uppercase tracking-[0.2em] text-fern">
-            State Bank Members
+            {BRAND_NAME} Members
           </div>
           <h2 className="mt-3 text-balance font-display text-xl font-extrabold leading-[1.15] tracking-tight text-white sm:text-2xl md:text-3xl">
             Helping everyday people take control of their financial future, together.

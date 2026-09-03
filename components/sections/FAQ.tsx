@@ -2,39 +2,40 @@
 import { useState } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import { Plus, Minus } from "lucide-react"
+import { BRAND_NAME } from "@/lib/brand"
 
 const faqs = [
   {
-    q: "Is State Bank an online bank?",
-    a: "State Bank is the central bank and regulator of the Kingdom's financial sector, with a digital experience that works alongside licensed member banks to deliver banking services. Your money sits with a partner bank; State Bank builds the experience around it.",
+    q: `Is ${BRAND_NAME} an online bank?`,
+    a: `${BRAND_NAME} is the central bank and regulator of the Kingdom's financial sector, with a digital experience that works alongside licensed member banks to deliver banking services. Your money sits with a partner bank; ${BRAND_NAME} builds the experience around it.`,
   },
   {
-    q: "How do I open a State Bank account?",
+    q: `How do I open a ${BRAND_NAME} account?`,
     a: "Download the app, enter your email and a few details, and verify your identity. Most accounts are open in under three minutes, no paperwork, no branch visit.",
   },
   {
     q: "Where can I find a fee-free ATM?",
-    a: "Use any of the 60,000+ partner ATMs across the country, find one inside the State Bank app under \"ATMs nearby.\" Out-of-network withdrawals may incur the operator's fee.",
+    a: `Use any of the 60,000+ partner ATMs across the country, find one inside the ${BRAND_NAME} app under "ATMs nearby." Out-of-network withdrawals may incur the operator's fee.`,
   },
   {
-    q: "Does State Bank require a credit check to open an account?",
-    a: "No. Opening a checking account doesn't require a credit check or affect your score. The State Bank Credit Builder Card is similarly check-free to get started.",
+    q: `Does ${BRAND_NAME} require a credit check to open an account?`,
+    a: `No. Opening a checking account doesn't require a credit check or affect your score. The ${BRAND_NAME} Credit Builder Card is similarly check-free to get started.`,
   },
   {
-    q: "Which banks partner with State Bank?",
-    a: "Banking services are provided by State Bank's licensed member partner banks. Deposit insurance details are listed in-app and in the deposit account agreement.",
+    q: `Which banks partner with ${BRAND_NAME}?`,
+    a: `Banking services are provided by ${BRAND_NAME}'s licensed member partner banks. Deposit insurance details are listed in-app and in the deposit account agreement.`,
   },
   {
-    q: "How do I deposit money into my State Bank account?",
+    q: `How do I deposit money into my ${BRAND_NAME} account?`,
     a: "Set up direct deposit, transfer from another bank, deposit a check via mobile capture, or load cash at any participating retailer.",
   },
   {
-    q: "Are State Bank account deposits FDIC insured?",
+    q: `Are ${BRAND_NAME} account deposits FDIC insured?`,
     a: "Deposits held with our partner banks are eligible for FDIC-style coverage up to applicable limits. See the in-app disclosure for current details.",
   },
   {
-    q: "Where can I go to add money to my State Bank debit card?",
-    a: "Add cash for free at participating retailers nationwide. The State Bank app shows the nearest ones, hours included.",
+    q: `Where can I go to add money to my ${BRAND_NAME} debit card?`,
+    a: `Add cash for free at participating retailers nationwide. The ${BRAND_NAME} app shows the nearest ones, hours included.`,
   },
 ]
 

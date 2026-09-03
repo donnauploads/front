@@ -5,6 +5,7 @@ import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { cn } from "@/lib/utils"
 import { useStore } from "@/lib/store"
+import { BRAND_NAME } from "@/lib/brand"
 
 /** Time-of-day greeting from the device's local clock (which reflects the
  *  user's timezone/location). */
@@ -220,7 +221,7 @@ export function SbSidebar({ open, onClose, user }: SbSidebarProps) {
           <img
             className="side-logo"
             src="/lp2.png"
-            alt="State Bank"
+            alt={BRAND_NAME}
           />
         </Link>
 

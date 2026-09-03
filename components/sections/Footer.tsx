@@ -1,11 +1,12 @@
 import { Apple, Facebook, Instagram, Twitter } from "lucide-react"
+import { BRAND_NAME } from "@/lib/brand"
 
 const cols = [
   {
     title: "Popular Features",
     items: [
       "Membership Tiers",
-      "State Bank Debit Card",
+      `${BRAND_NAME} Debit Card`,
       "Build Credit",
       "Checking Account",
       "High Yield Savings Account",
@@ -31,14 +32,14 @@ const cols = [
       "Savings Calculator",
       "Find an ATM",
       "Paycheck Calculator",
-      "State Bank Reviews",
+      `${BRAND_NAME} Reviews`,
     ],
   },
   {
     title: "Privacy",
     items: [
       "Policies",
-      "State Bank Privacy Notice",
+      `${BRAND_NAME} Privacy Notice`,
       "Do Not Sell or Share My Personal Information",
       "Supporting Those With Disabilities",
     ],
@@ -165,9 +166,9 @@ export function Footer() {
           <div className="!mt-8 space-y-2 pt-4">
             <p className="font-semibold text-white/80">Licenses</p>
             <p>
-              State Bank is the central bank and regulator of the
+              {BRAND_NAME} is the central bank and regulator of the
               Kingdom of Bahrain&apos;s financial services sector, established
-              under the State Bank and Financial Institutions Law.
+              under the {BRAND_NAME} and Financial Institutions Law.
             </p>
             <p>
               Information presented here is provided for general reference and
@@ -177,13 +178,13 @@ export function Footer() {
           </div>
 
           <div className="!mt-8 space-y-1 pt-4">
-            <p className="font-semibold text-white/80">State Bank</p>
+            <p className="font-semibold text-white/80">{BRAND_NAME}</p>
             <p>King Faisal Highway, Diplomatic Area · Manama, Kingdom of Bahrain</p>
-            <p>Operated by the State Bank</p>
+            <p>Operated by the {BRAND_NAME}</p>
           </div>
 
           <p className="!mt-8 pt-4 text-white/45">
-            © {new Date().getFullYear()} State Bank. All rights
+            © {new Date().getFullYear()} {BRAND_NAME}. All rights
             reserved.
           </p>
         </div>

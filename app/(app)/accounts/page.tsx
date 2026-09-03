@@ -6,6 +6,7 @@ import { useStore } from "@/lib/store"
 import { cn } from "@/lib/utils"
 import type { Account, Transaction } from "@/lib/store"
 import { type DisplayCurrency, convertFromBase, currencyDecimals } from "@/lib/currency"
+import { BRAND_NAME } from "@/lib/brand"
 
 /**
  * Accounts view — the dedicated "Your accounts" screen reached from the
@@ -83,7 +84,7 @@ export default function AccountsPage() {
       <div className="page-head">
         <h2>Your accounts</h2>
         <p className="ph-sub">
-          All your State Bank accounts and balances in one place.
+          All your {BRAND_NAME} accounts and balances in one place.
         </p>
       </div>
 

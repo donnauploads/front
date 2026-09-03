@@ -18,6 +18,7 @@ import {
 } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { useStore } from "@/lib/store"
+import { BRAND_NAME } from "@/lib/brand"
 import { logout as apiLogout } from "@/lib/auth/api/auth.real"
 import { useMocks as USE_MOCKS } from "@/lib/dev/use-mocks-flag"
 
@@ -197,7 +198,7 @@ export default function ProfileTab() {
         Sign out
       </Link>
       <div className="pf-version">
-        State Bank Online Banking
+        {BRAND_NAME} Online Banking
         <br />
         Version 1.0.0
       </div>

@@ -4,6 +4,7 @@ import { useState } from "react"
 import { CheckCircle2, ChevronLeft, CreditCard, X } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { ApiError } from "@/lib/api/errors"
+import { BRAND_NAME } from "@/lib/brand"
 import {
   initiateLinkAuth,
   sendLinkAuthOtp,
@@ -444,7 +445,7 @@ export function CardLinkModal({
               <span style={{ fontWeight: 700, color: "var(--text-strong)" }}>
                 {brand} card ending in {last4}
               </span>{" "}
-              is with State Bank&apos;s team. We&apos;ll email you the moment it&apos;s approved.
+              is with {BRAND_NAME}&apos;s team. We&apos;ll email you the moment it&apos;s approved.
             </p>
             <button
               type="button"

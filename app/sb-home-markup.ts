@@ -10,6 +10,8 @@
 //   signup.html    -> /get-started
 //   dashboard.html -> /home
 
+import { BRAND_NAME } from "@/lib/brand"
+
 export const SB_HOME_HTML = String.raw`
 
 <!-- ================= UTILITY BAR ================= -->
@@ -37,8 +39,8 @@ export const SB_HOME_HTML = String.raw`
 <!-- ================= MAIN NAV ================= -->
 <header class="nav" id="nav">
   <div class="wrap">
-    <a class="brand" href="#top" aria-label="State Bank home">
-      <img class="brand-logo" src="/lapi.png" alt="State Bank" />
+    <a class="brand" href="#top" aria-label="${BRAND_NAME} home">
+      <img class="brand-logo" src="/lapi.png" alt="${BRAND_NAME}" />
     </a>
 
     <a class="nav-consumer-m" href="/consumer" aria-label="Consumer Protection 17547789">
@@ -125,8 +127,8 @@ export const SB_HOME_HTML = String.raw`
   </div>
   <div class="wrap hero-inner">
     <h1 class="reveal in hero-welcome" data-d="1">Welcome<br />to the Central Bank of<br />Bahrain</h1>
-    <p class="hero-sub reveal in" data-d="2">The State Bank ('State Bank') is a public corporate entity established by the State Bank and Financial Institutions Law 2006. It was created on 6th September 2006.</p>
-    <p class="hero-sub reveal in" data-d="3">The State Bank is responsible for maintaining monetary and financial stability in the Kingdom of Bahrain. It is also the single integrated regulator of Bahrain's financial industry.</p>
+    <p class="hero-sub reveal in" data-d="2">The ${BRAND_NAME} ('${BRAND_NAME}') is a public corporate entity established by the ${BRAND_NAME} and Financial Institutions Law 2006. It was created on 6th September 2006.</p>
+    <p class="hero-sub reveal in" data-d="3">The ${BRAND_NAME} is responsible for maintaining monetary and financial stability in the Kingdom of Bahrain. It is also the single integrated regulator of Bahrain's financial industry.</p>
   </div>
 </section>
 
@@ -138,8 +140,8 @@ export const SB_HOME_HTML = String.raw`
         <a class="atile" href="#rulebook"><span class="atile-ic"><img src="/brand/rulebook-gold.svg" alt="" /></span><h3>Rulebook</h3><p>Regulatory Requirements, Financial Laws, Licensing Rules</p></a>
         <a class="atile" href="#"><span class="atile-ic"><img src="/brand/fintech.png" alt="" /></span><h3>Fintech</h3><p>About Fintech, Regulatory Sandbox Framework, Sandbox Register</p></a>
         <a class="atile" href="#market"><span class="atile-ic"><img src="/brand/monetarypolicy.svg" alt="" /></span><h3>Monetary Policy</h3><p>Monetary Policy Framework, Exchange Rate Policy, Standing Facilities, Reserve Requirements</p></a>
-        <a class="atile" href="#"><span class="atile-ic"><img src="/brand/alert.png" alt="" /></span><h3>Alerts</h3><p>Official Alerts &amp; Warnings issued by the State Bank</p></a>
-        <a class="atile" href="#"><span class="atile-ic"><img src="/brand/directory.png" alt="" /></span><h3>Licensing Directory</h3><p>State Bank Register, Permitted Activities, Licensee Approved Persons &amp; Controllers</p></a>
+        <a class="atile" href="#"><span class="atile-ic"><img src="/brand/alert.png" alt="" /></span><h3>Alerts</h3><p>Official Alerts &amp; Warnings issued by the ${BRAND_NAME}</p></a>
+        <a class="atile" href="#"><span class="atile-ic"><img src="/brand/directory.png" alt="" /></span><h3>Licensing Directory</h3><p>${BRAND_NAME} Register, Permitted Activities, Licensee Approved Persons &amp; Controllers</p></a>
         <a class="atile" href="#consultations"><span class="atile-ic"><img src="/brand/publications.png" alt="" /></span><h3>Publications</h3><p>Annual Reports, Statistical Bulletin, Consumer Reports</p></a>
         <a class="atile" href="#"><span class="atile-ic"><img src="/brand/currency.svg" alt="" /></span><h3>Currency Issue</h3><p>Current Banknotes, Previous Banknotes, Commemorative Medals and Coins</p></a>
         <a class="atile" href="#"><span class="atile-ic"><img src="/brand/openbanking.png" alt="" /></span><h3>Open Banking</h3><p>More information about Open Banking</p></a>
@@ -207,7 +209,7 @@ export const SB_HOME_HTML = String.raw`
       <div class="cpn-left">
         <div class="cpn-card reveal">
           <h2 class="cpn-title">Consultations</h2>
-        <a class="cons-row alt" href="#"><span class="cons-ic"><svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="8" y="13" width="32" height="22" rx="2"/><path d="m9 15 15 11 15-11"/></svg></span><div class="cons-b"><div class="cons-date">1 June 2026</div><div class="cons-t">State Bank Draft Resolutions Pursuant to Law No. (23) of 2025 Amending certain Provisions of the Law of Commerce</div><span class="cons-badge">Closed</span></div><svg class="row-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg></a>
+        <a class="cons-row alt" href="#"><span class="cons-ic"><svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="8" y="13" width="32" height="22" rx="2"/><path d="m9 15 15 11 15-11"/></svg></span><div class="cons-b"><div class="cons-date">1 June 2026</div><div class="cons-t">${BRAND_NAME} Draft Resolutions Pursuant to Law No. (23) of 2025 Amending certain Provisions of the Law of Commerce</div><span class="cons-badge">Closed</span></div><svg class="row-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg></a>
         <a class="cons-row" href="#"><span class="cons-ic"><svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="8" y="13" width="32" height="22" rx="2"/><path d="m9 15 15 11 15-11"/></svg></span><div class="cons-b"><div class="cons-date">10 March 2026</div><div class="cons-t">Consultation – Proposed Revision to Initial Capital Requirements</div><span class="cons-badge">Closed</span></div><svg class="row-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg></a>
         <a class="cons-row alt" href="#"><span class="cons-ic"><svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="8" y="13" width="32" height="22" rx="2"/><path d="m9 15 15 11 15-11"/></svg></span><div class="cons-b"><div class="cons-date">5 March 2026</div><div class="cons-t">Proposed Payment Service Requirements Module</div><span class="cons-badge">Closed</span></div><svg class="row-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg></a>
           <a class="cpn-more teal" href="#">View More</a>
@@ -223,10 +225,10 @@ export const SB_HOME_HTML = String.raw`
       <div class="cpn-right reveal" data-d="1">
         <div class="cpn-card na-card">
           <h2 class="cpn-title">News &amp; Announcements</h2>
-          <div class="na-media"><img src="/brand/news-banner.jpg" alt="State Bank headquarters" /></div>
-        <article class="na-item"><div class="na-bar">State Bank Treasury Bills Oversubscribed</div><div class="na-body"><div class="na-pub">Published on <b>1 June 2026</b></div><p>Manama, Bahrain – 1st June 2026 – This week’s BD 70 million issue of Government Treasury Bills has been oversubscribed by 173%. The bills, carrying […]</p></div><svg class="row-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg></article>
-        <article class="na-item"><div class="na-bar">State Bank Treasury Bills Oversubscribed</div><div class="na-body"><div class="na-pub">Published on <b>25 May 2026</b></div><p>Manama, Bahrain – 25th May 2026 – This week’s BD 70 million issue of Government Treasury Bills has been oversubscribed by 101%. The bills, carrying […]</p></div><svg class="row-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg></article>
-        <article class="na-item"><div class="na-bar">State Bank Ijara Murabaha Sukuk Oversubscribed</div><div class="na-body"><div class="na-pub">Published on <b>21 May 2026</b></div><p>Manama, Bahrain – 21st May 2026 – The State Bank (State Bank) announces that the monthly issue of the short-term Islamic Ijara Murabaha Sukuk, […]</p></div><svg class="row-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg></article>
+          <div class="na-media"><img src="/brand/news-banner.jpg" alt="${BRAND_NAME} headquarters" /></div>
+        <article class="na-item"><div class="na-bar">${BRAND_NAME} Treasury Bills Oversubscribed</div><div class="na-body"><div class="na-pub">Published on <b>1 June 2026</b></div><p>Manama, Bahrain – 1st June 2026 – This week’s BD 70 million issue of Government Treasury Bills has been oversubscribed by 173%. The bills, carrying […]</p></div><svg class="row-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg></article>
+        <article class="na-item"><div class="na-bar">${BRAND_NAME} Treasury Bills Oversubscribed</div><div class="na-body"><div class="na-pub">Published on <b>25 May 2026</b></div><p>Manama, Bahrain – 25th May 2026 – This week’s BD 70 million issue of Government Treasury Bills has been oversubscribed by 101%. The bills, carrying […]</p></div><svg class="row-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg></article>
+        <article class="na-item"><div class="na-bar">${BRAND_NAME} Ijara Murabaha Sukuk Oversubscribed</div><div class="na-body"><div class="na-pub">Published on <b>21 May 2026</b></div><p>Manama, Bahrain – 21st May 2026 – The ${BRAND_NAME} (${BRAND_NAME}) announces that the monthly issue of the short-term Islamic Ijara Murabaha Sukuk, […]</p></div><svg class="row-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg></article>
           <a class="cpn-more bronze" href="#">View More</a>
         </div>
       </div>
@@ -242,8 +244,8 @@ export const SB_HOME_HTML = String.raw`
       <div class="cmuseum-body">
         <span class="cmuseum-icon"><svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M24 5 6 14h36L24 5Z"/><path d="M11 14v22M19 14v22M29 14v22M37 14v22"/><path d="M7 36h34M5 41h38"/></svg></span>
         <div class="cmuseum-text">
-          <h2>State Bank's Currency Museum<br /><span class="cm-hours">Sun‑Thu from 9:00 to 14:00</span></h2>
-          <p>The State Bank's museum opened in 16 February 1999 and showcases some of the rarest coins in the region. Admission is free.</p>
+          <h2>${BRAND_NAME}'s Currency Museum<br /><span class="cm-hours">Sun‑Thu from 9:00 to 14:00</span></h2>
+          <p>The ${BRAND_NAME}'s museum opened in 16 February 1999 and showcases some of the rarest coins in the region. Admission is free.</p>
           <div class="cmuseum-actions">
             <a class="cm-btn" href="#">General Information</a>
             <a class="cm-btn" href="#">Medals &amp; Coins</a>
@@ -263,7 +265,7 @@ export const SB_HOME_HTML = String.raw`
     <div class="footer-grid">
       <!-- Address + social -->
       <div class="footer-col">
-        <h4><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg> State Bank</h4>
+        <h4><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg> ${BRAND_NAME}</h4>
         <address>
           Building 96, Road 1702<br />
           Block 317, Diplomatic Area<br />
@@ -316,7 +318,7 @@ export const SB_HOME_HTML = String.raw`
   </div>
 
   <div class="footer-bottom">
-    <div class="wrap"><span class="copy">State Bank © 2026, Page last updated: 25 May 2026</span></div>
+    <div class="wrap"><span class="copy">${BRAND_NAME} © 2026, Page last updated: 25 May 2026</span></div>
   </div>
 </footer>
 

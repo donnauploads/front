@@ -6,6 +6,7 @@ import Link from "next/link"
 import { motion, AnimatePresence } from "framer-motion"
 import { X } from "lucide-react"
 import { Logo } from "@/components/ui/Logo"
+import { BRAND_NAME } from "@/lib/brand"
 
 const PRIMARY = [
   { label: "Fee-free Banking", href: "/#fee-free" },
@@ -96,7 +97,7 @@ export function NavDrawer({
           >
             {/* Header */}
             <div className="flex items-center justify-between px-5 pt-4 pb-2 sm:px-6 sm:pt-6 sm:pb-4">
-              <Link href="/" onClick={onClose} aria-label="State Bank home">
+              <Link href="/" onClick={onClose} aria-label={`${BRAND_NAME} home`}>
                 <Logo theme="light" className="text-xl sm:text-2xl" />
               </Link>
               <button
@@ -159,10 +160,10 @@ export function NavDrawer({
                 </div>
                 <div className="min-w-0">
                   <div className="text-[10px] font-semibold uppercase tracking-widest text-kale/70 sm:text-[11px]">
-                    State Bank Guides
+                    {BRAND_NAME} Guides
                   </div>
                   <div className="mt-0.5 line-clamp-2 text-xs font-semibold text-kale sm:text-sm">
-                    What is State Bank? A bank built around how you actually live.
+                    What is {BRAND_NAME}? A bank built around how you actually live.
                   </div>
                 </div>
               </Link>

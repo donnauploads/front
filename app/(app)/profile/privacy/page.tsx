@@ -6,6 +6,7 @@ import { ExternalLink, Loader2 } from "lucide-react"
 import { ProfileSubPage } from "@/components/profile/ProfileSubPage"
 import { Toast } from "@/components/ui/Toast"
 import { ApiError } from "@/lib/api/errors"
+import { BRAND_NAME } from "@/lib/brand"
 import {
   getMyPreferences,
   updateMyPreferences,
@@ -28,7 +29,7 @@ const TOGGLES: { key: ToggleKey; label: string; body: string }[] = [
   },
   {
     key: "analytics",
-    label: "Help improve State Bank with analytics",
+    label: `Help improve ${BRAND_NAME} with analytics`,
     body: "Anonymous usage data that helps us prioritize what to build next.",
   },
   {

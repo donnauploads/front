@@ -2,6 +2,7 @@
 
 import { useEffect, useRef } from "react"
 import { CONSUMER_HTML } from "./consumer-markup"
+import { BRAND_NAME } from "@/lib/brand"
 import "../sb-home.css"
 import "./consumer.css"
 
@@ -131,7 +132,7 @@ export default function ConsumerPage() {
       videoCard.classList.add("playing")
       const iframe = document.createElement("iframe")
       iframe.src = `https://www.youtube.com/embed/${id}?autoplay=1&rel=0`
-      iframe.title = "State Bank Customer Complaints Procedure"
+      iframe.title = `${BRAND_NAME} Customer Complaints Procedure`
       iframe.allow =
         "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
       iframe.referrerPolicy = "strict-origin-when-cross-origin"

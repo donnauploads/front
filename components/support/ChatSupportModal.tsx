@@ -5,6 +5,7 @@ import { AnimatePresence, motion } from "framer-motion"
 import { Send, ShieldCheck, X } from "lucide-react"
 import { useStore } from "@/lib/store"
 import { cn } from "@/lib/utils"
+import { BRAND_NAME } from "@/lib/brand"
 import {
   listMyMessages,
   markMyThreadRead,
@@ -304,7 +305,7 @@ export function ChatSupportModal({
                   <span className={cn("chat-dot", presence)} aria-hidden />
                 </span>
                 <div>
-                  <div className="chat-name">State Bank Support</div>
+                  <div className="chat-name">{BRAND_NAME} Support</div>
                   <div className="chat-status">
                     {presence === "online"
                       ? "Online · replies in minutes"

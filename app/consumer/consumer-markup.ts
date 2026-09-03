@@ -13,6 +13,8 @@
 // NOTE: the complaint video uses a placeholder YouTube id (data-yt) —
 // replace "PLACEHOLDER" with the real State Bank video id.
 
+import { BRAND_NAME } from "@/lib/brand"
+
 export const CONSUMER_HTML = String.raw`
 
 <!-- ================= UTILITY BAR ================= -->
@@ -40,8 +42,8 @@ export const CONSUMER_HTML = String.raw`
 <!-- ================= MAIN NAV ================= -->
 <header class="nav" id="nav">
   <div class="wrap">
-    <a class="brand" href="/" aria-label="State Bank home">
-      <img class="brand-logo" src="/lapi.png" alt="State Bank" />
+    <a class="brand" href="/" aria-label="${BRAND_NAME} home">
+      <img class="brand-logo" src="/lapi.png" alt="${BRAND_NAME}" />
     </a>
 
     <a class="nav-consumer-m" href="/consumer" aria-label="Consumer Protection 17547789">
@@ -113,13 +115,13 @@ export const CONSUMER_HTML = String.raw`
 
   <!-- a) Hero banner -->
   <section class="cinfo-hero">
-    <img src="/brand/consumer-hero.jpg" alt="State Bank headquarters" />
+    <img src="/brand/consumer-hero.jpg" alt="${BRAND_NAME} headquarters" />
   </section>
 
   <!-- b) Breadcrumb + page title -->
   <section class="cinfo-head">
     <div class="wrap">
-      <nav class="crumb" aria-label="Breadcrumb"><a href="/">State Bank</a> <span aria-hidden="true">›</span> Consumer Information</nav>
+      <nav class="crumb" aria-label="Breadcrumb"><a href="/">${BRAND_NAME}</a> <span aria-hidden="true">›</span> Consumer Information</nav>
       <h1>Consumer Information</h1>
     </div>
   </section>
@@ -130,15 +132,15 @@ export const CONSUMER_HTML = String.raw`
       <h2 class="cs-h2">Making a Complaint</h2>
 
       <div class="cs-video" data-yt="KYgwooYe-Rg">
-        <img class="csv-poster" src="https://i.ytimg.com/vi/KYgwooYe-Rg/hqdefault.jpg" alt="State Bank Customer Complaints Procedure" />
-        <button class="csv-play" type="button" aria-label="Play State Bank Customer Complaints Procedure video">
+        <img class="csv-poster" src="https://i.ytimg.com/vi/KYgwooYe-Rg/hqdefault.jpg" alt="${BRAND_NAME} Customer Complaints Procedure" />
+        <button class="csv-play" type="button" aria-label="Play ${BRAND_NAME} Customer Complaints Procedure video">
           <span class="csv-play-ic"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg></span>
         </button>
       </div>
 
       <div class="cs-copy">
-        <p>The State Bank reviews complaints received against licensees to ensure they are handled fairly, promptly and in line with the regulatory requirements set out in the State Bank Rulebook.</p>
-        <p>As a consumer, you should first raise your complaint directly with the bank, financing company or insurer concerned and allow them the opportunity to respond. If you are not satisfied with their final response, or do not receive one within the stipulated period, you may escalate the matter to the State Bank. You can also reach the Consumer Protection team on <strong>+973 17547789</strong>.</p>
+        <p>The ${BRAND_NAME} reviews complaints received against licensees to ensure they are handled fairly, promptly and in line with the regulatory requirements set out in the ${BRAND_NAME} Rulebook.</p>
+        <p>As a consumer, you should first raise your complaint directly with the bank, financing company or insurer concerned and allow them the opportunity to respond. If you are not satisfied with their final response, or do not receive one within the stipulated period, you may escalate the matter to the ${BRAND_NAME}. You can also reach the Consumer Protection team on <strong>+973 17547789</strong>.</p>
         <p>For complaints relating to Capital Markets, listed companies, brokers or investment products, please use the dedicated Capital Markets complaint form.</p>
       </div>
 
@@ -154,8 +156,8 @@ export const CONSUMER_HTML = String.raw`
   <section class="cs-overview">
     <div class="wrap">
       <h2 class="cs-h2">Overview</h2>
-      <p>Under Article 3 of the State Bank and Financial Institutions Law (2006), the State Bank is responsible for protecting the interests of depositors and the customers of licensees, and for maintaining confidence in the financial system of the Kingdom.</p>
-      <p>Article 4 empowers the State Bank to issue the regulations, directives and guidelines necessary to give effect to these objectives, including the conduct-of-business and consumer-protection rules that licensees must follow when dealing with their customers.</p>
+      <p>Under Article 3 of the ${BRAND_NAME} and Financial Institutions Law (2006), the ${BRAND_NAME} is responsible for protecting the interests of depositors and the customers of licensees, and for maintaining confidence in the financial system of the Kingdom.</p>
+      <p>Article 4 empowers the ${BRAND_NAME} to issue the regulations, directives and guidelines necessary to give effect to these objectives, including the conduct-of-business and consumer-protection rules that licensees must follow when dealing with their customers.</p>
       <ul class="cs-list">
         <li><strong>Consumer alerts</strong>warnings about unlicensed entities and fraudulent schemes operating in or targeting Bahrain.</li>
         <li><strong>Consumer guides</strong>plain-language explanations of banking, lending and insurance products and your rights.</li>
@@ -169,10 +171,10 @@ export const CONSUMER_HTML = String.raw`
   <section class="cs-overview">
     <div class="wrap">
       <h2 class="cs-h2">Deposits &amp; Unrestricted Investment Accounts Protection Scheme</h2>
-      <p>The Scheme was established under Resolution No. (34) of 2010 to protect eligible depositors and holders of unrestricted investment accounts at member institutions licensed by the State Bank.</p>
+      <p>The Scheme was established under Resolution No. (34) of 2010 to protect eligible depositors and holders of unrestricted investment accounts at member institutions licensed by the ${BRAND_NAME}.</p>
       <p>It is a prefunded scheme: member institutions contribute to dedicated funds in advance, so that compensation can be paid quickly if a member is unable to repay its depositors.</p>
       <p>Coverage is provided up to a maximum of <strong>BD 20,000</strong> per depositor, per member institution, in line with the rules of the Scheme.</p>
-      <p>Full details of eligibility, calculation and the payout process are set out in the relevant Module of the State Bank Rulebook.</p>
+      <p>Full details of eligibility, calculation and the payout process are set out in the relevant Module of the ${BRAND_NAME} Rulebook.</p>
 
       <div class="cs-accordion">
         <button class="cs-acc-head" id="fsToggle" type="button" aria-expanded="true" aria-controls="fsBody">
@@ -206,7 +208,7 @@ export const CONSUMER_HTML = String.raw`
   <div class="wrap footer-top">
     <div class="footer-grid">
       <div class="footer-col">
-        <h4><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg> State Bank</h4>
+        <h4><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg> ${BRAND_NAME}</h4>
         <address>
           Building 96, Road 1702<br />
           Block 317, Diplomatic Area<br />
@@ -252,7 +254,7 @@ export const CONSUMER_HTML = String.raw`
   </div>
 
   <div class="footer-bottom">
-    <div class="wrap"><span class="copy">State Bank © 2026, Page last updated: 25 May 2026</span></div>
+    <div class="wrap"><span class="copy">${BRAND_NAME} © 2026, Page last updated: 25 May 2026</span></div>
   </div>
 </footer>
 

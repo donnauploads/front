@@ -5,6 +5,7 @@ import type { Socket } from "socket.io-client"
 import { Send, ShieldCheck, X } from "lucide-react"
 import { connectGuestSocket } from "@/lib/realtime/socket"
 import { ApiError } from "@/lib/api/errors"
+import { BRAND_NAME } from "@/lib/brand"
 import {
   clearStoredGuest,
   listGuestMessages,
@@ -349,7 +350,7 @@ export function GuestChatModal({
       ref={overlayRef}
       role="dialog"
       aria-modal="true"
-      aria-label="Chat with State Bank support"
+      aria-label={`Chat with ${BRAND_NAME} support`}
       onClick={onClose}
       className="gcm-overlay"
       style={{
@@ -421,7 +422,7 @@ export function GuestChatModal({
           </span>
           <div style={{ flex: 1, minWidth: 0 }}>
             <div style={{ fontSize: 14.5, fontWeight: 700, color: "#211F1B" }}>
-              State Bank Support
+              {BRAND_NAME} Support
             </div>
             <div style={{ fontSize: 11.5, color: "#756F66", marginTop: 1 }}>
               {stage === "chat"
