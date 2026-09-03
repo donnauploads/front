@@ -130,8 +130,22 @@ export function biometricRegisterFinish(
   })
 }
 
-export function biometricRemove(id: string): Promise<void> {
-  return apiFetch<void>(`/me/biometric/${id}`, { method: "DELETE" })
+/**
+ * Remove (soft-disable) a passkey. The backend requires a fresh PIN
+ * step-up for this security downgrade, so pass the `security:manage`
+ * elevation token from verifyTransactionPin(). The server emits a
+ * security notification on success.
+ */
+export function biometricRemove(
+  id: string,
+  elevationToken?: string,
+): Promise<void> {
+  return apiFetch<void>(`/me/biometric/${id}`, {
+    method: "DELETE",
+    ...(elevationToken
+      ? { headers: { "x-elevation": elevationToken } }
+      : {}),
+  })
 }
 
 /**

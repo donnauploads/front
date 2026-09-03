@@ -13,7 +13,11 @@ import { apiFetch } from "@/lib/api/client"
 
 export type PinStatus = { enabled: boolean }
 
-export type ElevationScope = "transfer:authorize" | "profile:edit" | "card:reveal"
+export type ElevationScope =
+  | "transfer:authorize"
+  | "profile:edit"
+  | "card:reveal"
+  | "security:manage"
 
 export type VerifyPinResult = {
   elevationToken: string

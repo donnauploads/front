@@ -21,6 +21,7 @@ import {
 import {
   getTransactionPinStatus,
   setTransactionPin,
+  verifyTransactionPin,
 } from "@/lib/security/api/transaction-pin"
 import { ProfileSubPage } from "@/components/profile/ProfileSubPage"
 import { Toast } from "@/components/ui/Toast"
@@ -41,6 +42,7 @@ import {
   totpBegin,
   totpDisable,
   totpVerify,
+  type BiometricEnrollment,
   type SecurityOverview,
   type SessionRow,
 } from "@/lib/profile/api/security.real"
@@ -63,6 +65,14 @@ export default function SecurityCenterPage() {
   const [pinEnabled, setPinEnabled] = useState<boolean | null>(null)
   const [totpOpen, setTotpOpen] = useState<"enable" | "disable" | null>(null)
   const [bioBusy, setBioBusy] = useState(false)
+  const [bioEnrollments, setBioEnrollments] = useState<
+    BiometricEnrollment[] | null
+  >(null)
+  // PIN step-up prompt for removing passkey(s). `target: "all"` disables
+  // biometric account-wide (the master toggle); a specific id removes one.
+  const [pinConfirm, setPinConfirm] = useState<{
+    target: "all" | string
+  } | null>(null)
   const [revokingId, setRevokingId] = useState<string | null>(null)
 
   const flash = useCallback(
@@ -74,14 +84,16 @@ export default function SecurityCenterPage() {
   )
 
   const refresh = useCallback(async () => {
-    const [ov, ss, pin] = await Promise.all([
+    const [ov, ss, pin, bio] = await Promise.all([
       getSecurityOverview(),
       listSessions(),
       getTransactionPinStatus().catch(() => ({ enabled: false })),
+      listBiometric().catch(() => [] as BiometricEnrollment[]),
     ])
     setOverview(ov)
     setSessions(ss.filter((s) => !s.revokedAt))
     setPinEnabled(pin.enabled)
+    setBioEnrollments(bio)
   }, [])
 
   useEffect(() => {
@@ -180,25 +192,50 @@ export default function SecurityCenterPage() {
     setTotpOpen(overview.totpActive ? "disable" : "enable")
   }
 
+  // Open the PIN step-up before removing passkey(s). Disabling a sign-in
+  // factor is a security downgrade, so the backend requires a fresh
+  // transaction-PIN elevation (scope security:manage). `target: "all"`
+  // disables biometric account-wide; an id removes just that passkey.
+  function requestRemove(target: "all" | string) {
+    if (bioBusy) return
+    if (pinEnabled === false) {
+      flash("Set a transaction PIN first to manage biometrics.")
+      setPinOpen(true)
+      return
+    }
+    setPinConfirm({ target })
+  }
+
+  // Runs after the user enters their PIN in the confirm modal. Throws on a
+  // bad PIN / failed removal so the modal can surface the error and stay open.
+  async function confirmRemove(pin: string, target: "all" | string) {
+    const { elevationToken } = await verifyTransactionPin(pin, "security:manage")
+    if (target === "all") {
+      const rows = await listBiometric()
+      // Sequential so one elevation token cleanly covers each DELETE.
+      for (const r of rows) await biometricRemove(r.id, elevationToken)
+    } else {
+      await biometricRemove(target, elevationToken)
+    }
+    await refresh().catch(() => {})
+    setPinConfirm(null)
+    flash("Biometric off")
+  }
+
   async function onToggleBiometric() {
     if (!overview || bioBusy) return
+    if (overview.biometricEnrolled) {
+      // Biometric is account-level: with a synced passkey (iCloud / Google
+      // Password Manager) the whole account shares ONE credential, and the
+      // backend soft-disables that shared row on remove — turning sign-in
+      // off on every device that uses it. Turning OFF here therefore
+      // disables biometric for the account, gated behind a PIN step-up.
+      requestRemove("all")
+      return
+    }
     setBioBusy(true)
     try {
-      if (overview.biometricEnrolled) {
-        // Biometric is account-level: with a synced passkey (iCloud / Google
-        // Password Manager) the whole account shares ONE credential, and the
-        // backend soft-disables that shared row on remove — which turns
-        // sign-in off on every device that uses it. There is no coherent
-        // "off for just this device" for a synced credential, so OFF disables
-        // biometric for the account (all active enrollments) and the toggle
-        // reads off. Re-enabling from any device restores it everywhere.
-        const rows = await listBiometric()
-        await Promise.all(rows.map((r) => biometricRemove(r.id)))
-        await refresh().catch(() =>
-          setOverview({ ...overview, biometricEnrolled: false }),
-        )
-        flash("Biometric off")
-      } else {
+      {
         const deviceId = currentDeviceId
         if (!deviceId) {
           flash("No active session, sign in again first.")
@@ -221,7 +258,11 @@ export default function SecurityCenterPage() {
         if (!rebound) {
           await enrollBiometric(deviceId)
         }
-        setOverview({ ...overview, biometricEnrolled: true })
+        // Refresh so the new passkey shows in the list below; fall back to
+        // an optimistic flag flip if the reload hiccups (e.g. Neon cold start).
+        await refresh().catch(() =>
+          setOverview({ ...overview, biometricEnrolled: true }),
+        )
         flash("Biometric on")
       }
     } catch (e) {
@@ -248,7 +289,9 @@ export default function SecurityCenterPage() {
     setBioBusy(true)
     try {
       await enrollBiometric(deviceId)
-      setOverview({ ...overview, biometricEnrolled: true })
+      await refresh().catch(() =>
+        setOverview({ ...overview, biometricEnrolled: true }),
+      )
       flash("Biometric re-set up on this device")
     } catch (e) {
       const msg = friendlyBiometricError(e)
@@ -342,6 +385,104 @@ export default function SecurityCenterPage() {
                 >
                   Not prompting for Face/Touch/Hello? Re-set up on this device
                 </button>
+              )}
+              {bioEnrollments && bioEnrollments.length > 0 && (
+                <div
+                  style={{
+                    marginTop: 14,
+                    borderTop: "1px solid var(--line)",
+                    paddingTop: 12,
+                  }}
+                >
+                  <div
+                    style={{
+                      fontSize: 12,
+                      fontWeight: 700,
+                      color: "var(--ink-mute)",
+                      textTransform: "uppercase",
+                      letterSpacing: ".04em",
+                      marginBottom: 4,
+                    }}
+                  >
+                    Your passkeys
+                  </div>
+                  {bioEnrollments.map((e) => (
+                    <div
+                      key={e.id}
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: 12,
+                        padding: "10px 0",
+                      }}
+                    >
+                      <span
+                        aria-hidden
+                        style={{
+                          display: "grid",
+                          placeItems: "center",
+                          width: 34,
+                          height: 34,
+                          borderRadius: 9,
+                          background: "var(--surface-2)",
+                          color: "var(--ink-soft)",
+                          flexShrink: 0,
+                        }}
+                      >
+                        <KeyRound width={16} height={16} />
+                      </span>
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <div
+                          style={{
+                            fontSize: 13.5,
+                            fontWeight: 600,
+                            color: "var(--text-strong)",
+                          }}
+                        >
+                          {passkeyLabel(e)}
+                        </div>
+                        <div
+                          style={{ fontSize: 12, color: "var(--ink-mute)" }}
+                        >
+                          Added {relTime(e.createdAt)}
+                          {e.lastUsedAt
+                            ? ` · last used ${relTime(e.lastUsedAt)}`
+                            : ""}
+                        </div>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => requestRemove(e.id)}
+                        disabled={bioBusy || !!pinConfirm}
+                        style={{
+                          flexShrink: 0,
+                          background: "transparent",
+                          border: "1.5px solid var(--line)",
+                          borderRadius: 8,
+                          padding: "6px 12px",
+                          fontSize: 12.5,
+                          fontWeight: 600,
+                          color: "var(--danger, #c0392b)",
+                          cursor: bioBusy ? "default" : "pointer",
+                        }}
+                      >
+                        Remove
+                      </button>
+                    </div>
+                  ))}
+                  <p
+                    style={{
+                      fontSize: 11.5,
+                      color: "var(--ink-mute)",
+                      marginTop: 6,
+                      lineHeight: 1.5,
+                    }}
+                  >
+                    Removing a passkey needs your transaction PIN. You can still
+                    sign in with your password, so this won&rsquo;t lock you
+                    out.
+                  </p>
+                </div>
               )}
             </div>
           </div>
@@ -475,6 +616,22 @@ export default function SecurityCenterPage() {
             flash(msg)
             void refresh()
           }}
+        />
+      )}
+      {pinConfirm && (
+        <PinConfirmModal
+          title={
+            pinConfirm.target === "all"
+              ? "Turn off biometric sign-in"
+              : "Remove this passkey"
+          }
+          body={
+            pinConfirm.target === "all"
+              ? "Enter your transaction PIN to disable biometric sign-in on your account."
+              : "Enter your transaction PIN to remove this passkey."
+          }
+          onConfirm={(pin) => confirmRemove(pin, pinConfirm.target)}
+          onClose={() => setPinConfirm(null)}
         />
       )}
 
@@ -1103,6 +1260,114 @@ function TransactionPinModal({
   )
 }
 
+/**
+ * Single-field PIN step-up used to authorize a security downgrade (removing
+ * a passkey / turning biometric off). `onConfirm` must throw on failure —
+ * the modal surfaces the error and stays open; on success the parent unmounts
+ * it. Mirrors TransactionPinModal's full-width input styling.
+ */
+function PinConfirmModal({
+  title,
+  body,
+  onConfirm,
+  onClose,
+}: {
+  title: string
+  body: string
+  onConfirm: (pin: string) => Promise<void>
+  onClose: () => void
+}) {
+  const [pin, setPin] = useState("")
+  const [submitting, setSubmitting] = useState(false)
+  const [err, setErr] = useState<string | null>(null)
+  const valid = /^\d{4,6}$/.test(pin)
+
+  async function submit() {
+    if (!valid || submitting) return
+    setSubmitting(true)
+    setErr(null)
+    try {
+      await onConfirm(pin)
+      // Success: parent clears pinConfirm, unmounting this modal.
+    } catch (e) {
+      setErr(
+        e instanceof ApiError
+          ? e.message || "Incorrect PIN, try again."
+          : "Network error. Try again.",
+      )
+      setPin("")
+      setSubmitting(false)
+    }
+  }
+
+  return (
+    <ModalShell title={title} icon={<Lock aria-hidden />} onClose={onClose}>
+      <p
+        style={{
+          marginTop: 14,
+          fontSize: 13.5,
+          color: "var(--ink-soft)",
+          lineHeight: 1.55,
+        }}
+      >
+        {body}
+      </p>
+      <div className="modal-field">
+        <input
+          autoFocus
+          type="password"
+          inputMode="numeric"
+          maxLength={6}
+          value={pin}
+          onChange={(e) => setPin(e.target.value.replace(/\D/g, ""))}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" && valid && !submitting) {
+              e.preventDefault()
+              void submit()
+            }
+          }}
+          className="otp-input"
+          aria-label="Transaction PIN"
+          style={{
+            display: "block",
+            width: "100%",
+            maxWidth: "none",
+            aspectRatio: "auto",
+            marginInline: 0,
+            height: 58,
+            boxSizing: "border-box",
+            marginTop: 8,
+            fontSize: 26,
+            letterSpacing: "0.4em",
+            textAlign: "center",
+            fontFamily: 'ui-monospace, "JetBrains Mono", Menlo, monospace',
+            fontWeight: 700,
+            color: "var(--text-strong)",
+            background: "var(--surface-2)",
+            border: "1.5px solid var(--line)",
+            borderRadius: 10,
+            outline: "none",
+          }}
+        />
+      </div>
+      {err && (
+        <p className="modal-err" role="alert">
+          {err}
+        </p>
+      )}
+      <button
+        type="button"
+        disabled={!valid || submitting}
+        onClick={submit}
+        className="lk-cta-btn primary"
+        style={{ marginTop: 18 }}
+      >
+        {submitting ? "Verifying…" : "Confirm"}
+      </button>
+    </ModalShell>
+  )
+}
+
 function ModalShell({
   title,
   icon,
@@ -1349,6 +1614,22 @@ function relTime(iso: string): string {
   const mo = Math.round(day / 30)
   if (mo < 12) return `${mo}mo ago`
   return `${Math.round(mo / 12)}y ago`
+}
+
+/**
+ * Friendly label for a passkey row, inferred from its WebAuthn transports.
+ * A synced passkey (iCloud/Google) shows as one platform entry even though
+ * it works on several devices — that's the truth, so we don't fake a
+ * per-device name.
+ */
+function passkeyLabel(e: BiometricEnrollment): string {
+  const t = e.transports ?? []
+  if (t.includes("internal"))
+    return "Platform passkey (Face ID / Touch ID / Windows Hello)"
+  if (t.includes("hybrid")) return "Phone passkey (added via another device)"
+  if (t.some((x) => x === "usb" || x === "nfc" || x === "ble"))
+    return "Security key"
+  return "Passkey"
 }
 
 // ─── WebAuthn biometric enrollment ────────────────────────────────────────
