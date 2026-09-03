@@ -92,7 +92,7 @@ export function RealtimeProvider({
       disconnectSocket()
       const msg =
         p.reason === "newer_login"
-          ? "Logged in successfully in safe mode."
+          ? "You signed in on another device, so you were signed out here."
           : p.reason === "password_changed"
             ? "Your password changed, please sign in again."
             : p.reason === "admin_revoke"
