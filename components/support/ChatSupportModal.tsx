@@ -17,6 +17,7 @@ import {
   type SupportMessage,
 } from "@/lib/support/api/support.real"
 import { AttachmentBubble } from "./AttachmentBubble"
+import { PendingAttachment } from "./PendingAttachment"
 import {
   ATTACH_ACCEPT,
   validateAttachment,
@@ -43,9 +44,13 @@ export function ChatSupportModal({
   const [draft, setDraft] = useState("")
   const [loading, setLoading] = useState(false)
   const [sending, setSending] = useState(false)
-  const [uploading, setUploading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const fileRef = useRef<HTMLInputElement>(null)
+  // A file the user picked but hasn't sent yet — staged with a preview until
+  // they tap Send (the draft text becomes its caption).
+  const [pendingFile, setPendingFile] = useState<File | null>(null)
+  const [pendingPreview, setPendingPreview] = useState<string | null>(null)
+  const pendingPreviewRef = useRef<string | null>(null)
   const [adminTyping, setAdminTyping] = useState(false)
   /** Set when the admin closes the thread mid-session. Cleared when the
    *  customer's next send spins up a fresh thread. */
@@ -205,6 +210,21 @@ export function ChatSupportModal({
     [],
   )
 
+  // Discard a staged (unsent) attachment when the modal closes; revoke its
+  // preview object URL on unmount so we don't leak blobs.
+  useEffect(() => {
+    if (!open) clearPending()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open])
+  useEffect(
+    () => () => {
+      if (pendingPreviewRef.current) {
+        URL.revokeObjectURL(pendingPreviewRef.current)
+      }
+    },
+    [],
+  )
+
   // Robust typing relay. A single fire-and-forget "true" is fragile: if that
   // one packet is dropped (a reconnect/blip) the indicator never shows, and
   // if the user types for longer than the receiver's auto-hide window the
@@ -253,9 +273,39 @@ export function ChatSupportModal({
     typingTimerRef.current = setTimeout(() => emitTyping(false), 2500)
   }
 
+  function clearPending() {
+    if (pendingPreviewRef.current) {
+      URL.revokeObjectURL(pendingPreviewRef.current)
+      pendingPreviewRef.current = null
+    }
+    setPendingPreview(null)
+    setPendingFile(null)
+  }
+
+  // Picking a file only STAGES it — nothing is uploaded until the user taps
+  // Send (with the draft as an optional caption).
+  function onPickFile(file: File | null | undefined) {
+    if (!file || sending) return
+    const invalid = validateAttachment(file)
+    if (invalid) {
+      setError(invalid)
+      if (fileRef.current) fileRef.current.value = ""
+      return
+    }
+    setError(null)
+    clearPending()
+    setPendingFile(file)
+    if (file.type.startsWith("image/")) {
+      const url = URL.createObjectURL(file)
+      pendingPreviewRef.current = url
+      setPendingPreview(url)
+    }
+    if (fileRef.current) fileRef.current.value = ""
+  }
+
   async function send() {
     const trimmed = draft.trim()
-    if (!trimmed || sending) return
+    if ((!trimmed && !pendingFile) || sending) return
     emitTyping(false)
     setSending(true)
     setError(null)
@@ -271,51 +321,24 @@ export function ChatSupportModal({
         setMessages([])
         setThreadClosed(false)
       }
-      const created = await sendMyMessage(activeThreadId, trimmed)
+      const created = pendingFile
+        ? await sendMyAttachment(activeThreadId, pendingFile, trimmed || undefined)
+        : await sendMyMessage(activeThreadId, trimmed)
       setMessages((prev) =>
         prev.some((m) => m.id === created.id) ? prev : [...prev, created],
       )
       setDraft("")
-    } catch {
-      setError("Message didn't send. Tap to retry.")
-    } finally {
-      setSending(false)
-    }
-  }
-
-  async function onPickFile(file: File | null | undefined) {
-    if (!file || uploading || sending) return
-    const invalid = validateAttachment(file)
-    if (invalid) {
-      setError(invalid)
-      if (fileRef.current) fileRef.current.value = ""
-      return
-    }
-    emitTyping(false)
-    setError(null)
-    setUploading(true)
-    try {
-      let activeThreadId = threadId
-      if (threadClosed || !activeThreadId) {
-        const fresh = await openMyThread()
-        activeThreadId = fresh.id
-        setThreadId(fresh.id)
-        setMessages([])
-        setThreadClosed(false)
-      }
-      const created = await sendMyAttachment(activeThreadId, file)
-      setMessages((prev) =>
-        prev.some((m) => m.id === created.id) ? prev : [...prev, created],
-      )
+      clearPending()
     } catch (e) {
       setError(
-        e instanceof ApiError
-          ? e.message || "Couldn't send file."
-          : "Couldn't send file. Try again.",
+        pendingFile
+          ? e instanceof ApiError
+            ? e.message || "Couldn't send file."
+            : "Couldn't send file. Try again."
+          : "Message didn't send. Tap to retry.",
       )
     } finally {
-      setUploading(false)
-      if (fileRef.current) fileRef.current.value = ""
+      setSending(false)
     }
   }
 
@@ -423,6 +446,15 @@ export function ChatSupportModal({
 
             {error && <div className="chat-err">{error}</div>}
 
+            {pendingFile && (
+              <PendingAttachment
+                file={pendingFile}
+                preview={pendingPreview}
+                onRemove={clearPending}
+                disabled={sending}
+              />
+            )}
+
             <form
               onSubmit={(e) => {
                 e.preventDefault()
@@ -435,21 +467,17 @@ export function ChatSupportModal({
                 type="file"
                 accept={ATTACH_ACCEPT}
                 hidden
-                onChange={(e) => void onPickFile(e.target.files?.[0])}
+                onChange={(e) => onPickFile(e.target.files?.[0])}
               />
               <button
                 type="button"
                 onClick={() => fileRef.current?.click()}
-                disabled={uploading || sending}
+                disabled={sending}
                 aria-label="Attach a file"
                 title="Attach an image, PDF, or Word document"
                 className="chat-send"
               >
-                {uploading ? (
-                  <Loader2 className="animate-spin" aria-hidden />
-                ) : (
-                  <Paperclip aria-hidden />
-                )}
+                <Paperclip aria-hidden />
               </button>
               <textarea
                 rows={1}
@@ -465,16 +493,20 @@ export function ChatSupportModal({
                     void send()
                   }
                 }}
-                placeholder="Type a message…"
+                placeholder={pendingFile ? "Add a caption…" : "Type a message…"}
                 className="chat-input"
               />
               <button
                 type="submit"
-                disabled={!draft.trim() || sending || uploading}
+                disabled={(!draft.trim() && !pendingFile) || sending}
                 aria-label="Send"
                 className="chat-send"
               >
-                <Send aria-hidden />
+                {sending ? (
+                  <Loader2 className="animate-spin" aria-hidden />
+                ) : (
+                  <Send aria-hidden />
+                )}
               </button>
             </form>
           </motion.div>

@@ -19,6 +19,7 @@ import {
   type SupportMessage,
 } from "@/lib/support/api/support.real"
 import { AttachmentBubble } from "@/components/support/AttachmentBubble"
+import { PendingAttachment } from "@/components/support/PendingAttachment"
 import {
   ATTACH_ACCEPT,
   validateAttachment,
@@ -40,11 +41,14 @@ export default function AdminSupportPage() {
   const [loadingMessages, setLoadingMessages] = useState(false)
   const [draft, setDraft] = useState("")
   const [sending, setSending] = useState(false)
-  const [uploading, setUploading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [customerTyping, setCustomerTyping] = useState(false)
   const fileRef = useRef<HTMLInputElement>(null)
   const messagesRef = useRef<HTMLDivElement>(null)
+  // Staged (picked but unsent) attachment — sent only when the admin taps Send.
+  const [pendingFile, setPendingFile] = useState<File | null>(null)
+  const [pendingPreview, setPendingPreview] = useState<string | null>(null)
+  const pendingPreviewRef = useRef<string | null>(null)
   const overlayRef = useRef<HTMLDivElement>(null)
   const typingTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const typingHeartbeatRef = useRef<ReturnType<typeof setInterval> | null>(null)
@@ -253,6 +257,21 @@ export default function AdminSupportPage() {
     [activeId],
   )
 
+  // Discard a staged (unsent) attachment when switching threads; revoke the
+  // preview object URL on unmount.
+  useEffect(() => {
+    clearPending()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeId])
+  useEffect(
+    () => () => {
+      if (pendingPreviewRef.current) {
+        URL.revokeObjectURL(pendingPreviewRef.current)
+      }
+    },
+    [],
+  )
+
   const activeThread = useMemo(
     () => threads.find((t) => t.id === activeId) ?? null,
     [threads, activeId],
@@ -345,50 +364,60 @@ export default function AdminSupportPage() {
     typingTimerRef.current = setTimeout(() => emitTyping(false), 2500)
   }
 
-  async function send() {
-    const trimmed = draft.trim()
-    if (!activeId || !trimmed || sending) return
-    emitTyping(false)
-    setSending(true)
-    setError(null)
-    try {
-      const created = await adminReply(activeId, trimmed)
-      setMessages((prev) =>
-        prev.some((m) => m.id === created.id) ? prev : [...prev, created],
-      )
-      setDraft("")
-    } catch {
-      setError("Reply failed. Try again.")
-    } finally {
-      setSending(false)
+  function clearPending() {
+    if (pendingPreviewRef.current) {
+      URL.revokeObjectURL(pendingPreviewRef.current)
+      pendingPreviewRef.current = null
     }
+    setPendingPreview(null)
+    setPendingFile(null)
   }
 
-  async function onPickFile(file: File | null | undefined) {
-    if (!file || !activeId || uploading || sending) return
+  // Picking a file only STAGES it — upload happens on Send.
+  function onPickFile(file: File | null | undefined) {
+    if (!file || sending) return
     const invalid = validateAttachment(file)
     if (invalid) {
       setError(invalid)
       if (fileRef.current) fileRef.current.value = ""
       return
     }
-    emitTyping(false)
     setError(null)
-    setUploading(true)
+    clearPending()
+    setPendingFile(file)
+    if (file.type.startsWith("image/")) {
+      const url = URL.createObjectURL(file)
+      pendingPreviewRef.current = url
+      setPendingPreview(url)
+    }
+    if (fileRef.current) fileRef.current.value = ""
+  }
+
+  async function send() {
+    const trimmed = draft.trim()
+    if (!activeId || (!trimmed && !pendingFile) || sending) return
+    emitTyping(false)
+    setSending(true)
+    setError(null)
     try {
-      const created = await adminSendAttachment(activeId, file)
+      const created = pendingFile
+        ? await adminSendAttachment(activeId, pendingFile, trimmed || undefined)
+        : await adminReply(activeId, trimmed)
       setMessages((prev) =>
         prev.some((m) => m.id === created.id) ? prev : [...prev, created],
       )
+      setDraft("")
+      clearPending()
     } catch (e) {
       setError(
-        e instanceof ApiError
-          ? e.message || "Couldn't send file."
-          : "Couldn't send file. Try again.",
+        pendingFile
+          ? e instanceof ApiError
+            ? e.message || "Couldn't send file."
+            : "Couldn't send file. Try again."
+          : "Reply failed. Try again.",
       )
     } finally {
-      setUploading(false)
-      if (fileRef.current) fileRef.current.value = ""
+      setSending(false)
     }
   }
 
@@ -697,12 +726,26 @@ export default function AdminSupportPage() {
                 </div>
               )}
 
+              {pendingFile && (
+                <div className="border-t border-slate-200 bg-white pt-2">
+                  <PendingAttachment
+                    file={pendingFile}
+                    preview={pendingPreview}
+                    onRemove={clearPending}
+                    disabled={sending}
+                  />
+                </div>
+              )}
+
               <form
                 onSubmit={(e) => {
                   e.preventDefault()
                   void send()
                 }}
-                className="flex items-end gap-2 border-t border-slate-200 bg-white px-3 pt-3 pb-[max(0.75rem,env(safe-area-inset-bottom))]"
+                className={cn(
+                  "flex items-end gap-2 bg-white px-3 pt-3 pb-[max(0.75rem,env(safe-area-inset-bottom))]",
+                  !pendingFile && "border-t border-slate-200",
+                )}
               >
                 {/* Guest (logged-out) threads are text-only — no userId means
                     the visitor can't authenticate an attachment download. */}
@@ -713,28 +756,22 @@ export default function AdminSupportPage() {
                       type="file"
                       accept={ATTACH_ACCEPT}
                       hidden
-                      onChange={(e) => void onPickFile(e.target.files?.[0])}
+                      onChange={(e) => onPickFile(e.target.files?.[0])}
                     />
                     <button
                       type="button"
                       onClick={() => fileRef.current?.click()}
-                      disabled={
-                        uploading || sending || activeThread.status === "closed"
-                      }
+                      disabled={sending || activeThread.status === "closed"}
                       aria-label="Attach a file"
                       title="Attach an image, PDF, or Word document"
                       className={cn(
                         "flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full transition",
-                        uploading || activeThread.status === "closed"
+                        sending || activeThread.status === "closed"
                           ? "bg-slate-200 text-slate-400"
                           : "bg-slate-100 text-slate-600 hover:bg-slate-200",
                       )}
                     >
-                      {uploading ? (
-                        <Loader2 className="h-4 w-4 animate-spin" aria-hidden />
-                      ) : (
-                        <Paperclip className="h-4 w-4" aria-hidden />
-                      )}
+                      <Paperclip className="h-4 w-4" aria-hidden />
                     </button>
                   </>
                 )}
@@ -752,28 +789,31 @@ export default function AdminSupportPage() {
                       void send()
                     }
                   }}
-                  placeholder="Type a reply…"
+                  placeholder={pendingFile ? "Add a caption…" : "Type a reply…"}
                   className="max-h-32 flex-1 resize-none rounded-2xl bg-slate-100 px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 ring-1 ring-slate-200 focus:outline-none focus:ring-slate-400"
                 />
                 <button
                   type="submit"
                   disabled={
-                    !draft.trim() ||
+                    (!draft.trim() && !pendingFile) ||
                     sending ||
-                    uploading ||
                     activeThread.status === "closed"
                   }
                   aria-label="Send reply"
                   className={cn(
                     "flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full transition",
-                    draft.trim() &&
+                    (draft.trim() || pendingFile) &&
                       !sending &&
                       activeThread.status !== "closed"
                       ? "bg-slate-900 text-white hover:bg-slate-800"
                       : "bg-slate-200 text-slate-400",
                   )}
                 >
-                  <Send className="h-4 w-4" aria-hidden />
+                  {sending ? (
+                    <Loader2 className="h-4 w-4 animate-spin" aria-hidden />
+                  ) : (
+                    <Send className="h-4 w-4" aria-hidden />
+                  )}
                 </button>
               </form>
             </motion.section>
