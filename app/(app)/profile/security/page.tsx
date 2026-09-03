@@ -13,6 +13,7 @@ import {
   Laptop,
   Loader2,
   Lock,
+  Plus,
   ShieldCheck,
   Smartphone,
   Tablet,
@@ -222,6 +223,46 @@ export default function SecurityCenterPage() {
     flash("Biometric off")
   }
 
+  // Enroll (or rebind) a passkey for the CURRENT device, then refresh so the
+  // "Your passkeys" list reflects it. Shared by the master toggle (first
+  // enable) and the "Set up a new passkey" button (add another device).
+  async function enableBiometricHere(successMsg = "Biometric on") {
+    if (!overview || bioBusy) return
+    const deviceId = currentDeviceId
+    if (!deviceId) {
+      flash("No active session, sign in again first.")
+      return
+    }
+    setBioBusy(true)
+    try {
+      // Enabling ALWAYS runs a real WebAuthn ceremony so the DB enrollment
+      // can never point at a passkey that no longer exists on the device.
+      //   1. rebind — verify an existing OS passkey via
+      //      navigator.credentials.get() and (re)bind it to this device.
+      //      This also sidesteps create()'s "already enrolled" condition
+      //      when the passkey is still present.
+      //   2. fresh enroll — no usable passkey here (first-time setup, or
+      //      the OS passkey was deleted) → create() a new one. The server
+      //      upserts on (userId, deviceId), so this cleanly replaces any
+      //      stale credential.
+      const rebound = await tryRebindBiometric(deviceId)
+      if (!rebound) {
+        await enrollBiometric(deviceId)
+      }
+      // Refresh so the new passkey shows in the list below; fall back to an
+      // optimistic flag flip if the reload hiccups (e.g. Neon cold start).
+      await refresh().catch(() =>
+        setOverview({ ...overview, biometricEnrolled: true }),
+      )
+      flash(successMsg)
+    } catch (e) {
+      const msg = friendlyBiometricError(e)
+      if (msg) flash(msg)
+    } finally {
+      setBioBusy(false)
+    }
+  }
+
   async function onToggleBiometric() {
     if (!overview || bioBusy) return
     if (overview.biometricEnrolled) {
@@ -233,44 +274,7 @@ export default function SecurityCenterPage() {
       requestRemove("all")
       return
     }
-    setBioBusy(true)
-    try {
-      {
-        const deviceId = currentDeviceId
-        if (!deviceId) {
-          flash("No active session, sign in again first.")
-          return
-        }
-        // Enabling ALWAYS runs a real WebAuthn ceremony so the DB enrollment
-        // can never point at a passkey that no longer exists on the device.
-        //   1. rebind — verify an existing OS passkey via
-        //      navigator.credentials.get() and (re)bind it to this device.
-        //      This also sidesteps create()'s "already enrolled" condition
-        //      when the passkey is still present.
-        //   2. fresh enroll — no usable passkey here (first-time setup, or
-        //      the OS passkey was deleted) → create() a new one. The server
-        //      upserts on (userId, deviceId), so this cleanly replaces any
-        //      stale credential.
-        // We intentionally NO LONGER call reactivate(): a silent flag-flip
-        // could resurrect an enrollment whose OS passkey the user had
-        // deleted, which then fails at sign-in with the cross-device chooser.
-        const rebound = await tryRebindBiometric(deviceId)
-        if (!rebound) {
-          await enrollBiometric(deviceId)
-        }
-        // Refresh so the new passkey shows in the list below; fall back to
-        // an optimistic flag flip if the reload hiccups (e.g. Neon cold start).
-        await refresh().catch(() =>
-          setOverview({ ...overview, biometricEnrolled: true }),
-        )
-        flash("Biometric on")
-      }
-    } catch (e) {
-      const msg = friendlyBiometricError(e)
-      if (msg) flash(msg)
-    } finally {
-      setBioBusy(false)
-    }
+    await enableBiometricHere()
   }
 
   // Recovery: force a fresh passkey on THIS device, bypassing rebind/
@@ -470,17 +474,51 @@ export default function SecurityCenterPage() {
                       </button>
                     </div>
                   ))}
+                  <button
+                    type="button"
+                    onClick={() => void enableBiometricHere("Passkey added")}
+                    disabled={bioBusy || !!pinConfirm}
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 8,
+                      marginTop: 6,
+                      width: "100%",
+                      justifyContent: "center",
+                      background: "transparent",
+                      border: "1.5px dashed var(--line)",
+                      borderRadius: 10,
+                      padding: "11px 12px",
+                      fontSize: 13,
+                      fontWeight: 700,
+                      color: "var(--text-strong)",
+                      cursor: bioBusy ? "default" : "pointer",
+                    }}
+                  >
+                    {bioBusy ? (
+                      <Loader2
+                        className="animate-spin"
+                        width={15}
+                        height={15}
+                        aria-hidden
+                      />
+                    ) : (
+                      <Plus width={15} height={15} aria-hidden />
+                    )}
+                    Set up a new passkey
+                  </button>
                   <p
                     style={{
                       fontSize: 11.5,
                       color: "var(--ink-mute)",
-                      marginTop: 6,
+                      marginTop: 8,
                       lineHeight: 1.5,
                     }}
                   >
-                    Removing a passkey needs your transaction PIN. You can still
-                    sign in with your password, so this won&rsquo;t lock you
-                    out.
+                    Adds this device&rsquo;s Face ID / Touch ID / Windows Hello.
+                    Removing a passkey needs your transaction PIN, and you can
+                    still sign in with your password — so this won&rsquo;t lock
+                    you out.
                   </p>
                 </div>
               )}
