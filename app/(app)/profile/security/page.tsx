@@ -185,13 +185,19 @@ export default function SecurityCenterPage() {
     setBioBusy(true)
     try {
       if (overview.biometricEnrolled) {
-        // Biometric is an account-level passkey (synced across the user's
-        // devices via iCloud / Google Password Manager), so turning it off
-        // removes the enrollment(s) account-wide.
+        // Remove ONLY this device's enrollment — never other devices'. (The
+        // display is account-level so the toggle reads ON wherever a synced
+        // passkey works; but turning it OFF here must not wipe the credential
+        // for the user's other devices. A synced credential's single row may
+        // be bound to another device, in which case there's nothing local to
+        // remove — that's fine, it stays enabled elsewhere.)
         const rows = await listBiometric()
-        await Promise.all(rows.map((r) => biometricRemove(r.id)))
-        setOverview({ ...overview, biometricEnrolled: false })
-        flash("Biometric off")
+        const mine = currentDeviceId
+          ? rows.filter((r) => r.deviceId === currentDeviceId)
+          : rows
+        await Promise.all(mine.map((r) => biometricRemove(r.id)))
+        await refresh().catch(() => {})
+        flash(mine.length ? "Biometric off on this device" : "Biometric off")
       } else {
         const deviceId = currentDeviceId
         if (!deviceId) {
