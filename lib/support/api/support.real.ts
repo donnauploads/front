@@ -4,9 +4,16 @@
  * HTTP calls handle the initial load + send / reply.
  */
 
-import { apiFetch } from "@/lib/api/client"
+import { apiFetch, apiFetchBlob } from "@/lib/api/client"
 
 export type SupportSenderRole = "customer" | "admin"
+
+export type SupportAttachment = {
+  name: string
+  type: string
+  size: number
+  kind: "image" | "file"
+}
 
 export type SupportMessage = {
   id: string
@@ -19,6 +26,9 @@ export type SupportMessage = {
    *  Populated only for admin-authored messages — used by the admin UI to
    *  render "Seen" under their last reply. */
   readAt?: string | null
+  /** Present when the message carries a file. Bytes are fetched separately
+   *  via the authenticated attachment endpoint (never a public URL). */
+  attachment?: SupportAttachment | null
 }
 
 export type SupportThread = {
@@ -88,6 +98,30 @@ export function sendMyMessage(
   )
 }
 
+export function sendMyAttachment(
+  threadId: string,
+  file: File,
+  caption?: string,
+): Promise<SupportMessage> {
+  const form = new FormData()
+  form.append("file", file)
+  if (caption) form.append("caption", caption)
+  return apiFetch<SupportMessage>(
+    `/support/thread/${encodeURIComponent(threadId)}/attachment`,
+    { method: "POST", body: form },
+  )
+}
+
+/** Authenticated fetch of an attachment's bytes → Blob (for object URLs). */
+export function fetchMyAttachment(
+  threadId: string,
+  messageId: string,
+): Promise<Blob> {
+  return apiFetchBlob(
+    `/support/thread/${encodeURIComponent(threadId)}/attachment/${encodeURIComponent(messageId)}`,
+  )
+}
+
 // ─── Admin ───────────────────────────────────────────────────────────
 
 export function listAdminThreads(): Promise<AdminThread[]> {
@@ -107,6 +141,30 @@ export function adminReply(
   return apiFetch<SupportMessage>(
     `/admin/support/threads/${encodeURIComponent(threadId)}/reply`,
     { method: "POST", body: { body } },
+  )
+}
+
+export function adminSendAttachment(
+  threadId: string,
+  file: File,
+  caption?: string,
+): Promise<SupportMessage> {
+  const form = new FormData()
+  form.append("file", file)
+  if (caption) form.append("caption", caption)
+  return apiFetch<SupportMessage>(
+    `/admin/support/threads/${encodeURIComponent(threadId)}/attachment`,
+    { method: "POST", body: form },
+  )
+}
+
+/** Authenticated fetch of an attachment's bytes → Blob (admin side). */
+export function fetchAdminAttachment(
+  threadId: string,
+  messageId: string,
+): Promise<Blob> {
+  return apiFetchBlob(
+    `/admin/support/threads/${encodeURIComponent(threadId)}/attachment/${encodeURIComponent(messageId)}`,
   )
 }
 

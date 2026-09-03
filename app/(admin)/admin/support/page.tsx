@@ -3,18 +3,26 @@
 import { useEffect, useMemo, useRef, useState } from "react"
 import { AnimatePresence, motion } from "framer-motion"
 import { formatDistanceToNow } from "date-fns"
-import { Send, Lock, X } from "lucide-react"
+import { Loader2, Paperclip, Send, Lock, X } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { useStore } from "@/lib/store"
+import { ApiError } from "@/lib/api/errors"
 import {
   adminCloseThread,
   adminReopenThread,
   adminReply,
+  adminSendAttachment,
+  fetchAdminAttachment,
   listAdminMessages,
   listAdminThreads,
   type AdminThread,
   type SupportMessage,
 } from "@/lib/support/api/support.real"
+import { AttachmentBubble } from "@/components/support/AttachmentBubble"
+import {
+  ATTACH_ACCEPT,
+  validateAttachment,
+} from "@/components/support/attachment-validate"
 import { peekSocket, getSocket } from "@/lib/realtime/socket"
 
 /**
@@ -32,8 +40,10 @@ export default function AdminSupportPage() {
   const [loadingMessages, setLoadingMessages] = useState(false)
   const [draft, setDraft] = useState("")
   const [sending, setSending] = useState(false)
+  const [uploading, setUploading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [customerTyping, setCustomerTyping] = useState(false)
+  const fileRef = useRef<HTMLInputElement>(null)
   const messagesRef = useRef<HTMLDivElement>(null)
   const overlayRef = useRef<HTMLDivElement>(null)
   const typingTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
@@ -354,6 +364,34 @@ export default function AdminSupportPage() {
     }
   }
 
+  async function onPickFile(file: File | null | undefined) {
+    if (!file || !activeId || uploading || sending) return
+    const invalid = validateAttachment(file)
+    if (invalid) {
+      setError(invalid)
+      if (fileRef.current) fileRef.current.value = ""
+      return
+    }
+    emitTyping(false)
+    setError(null)
+    setUploading(true)
+    try {
+      const created = await adminSendAttachment(activeId, file)
+      setMessages((prev) =>
+        prev.some((m) => m.id === created.id) ? prev : [...prev, created],
+      )
+    } catch (e) {
+      setError(
+        e instanceof ApiError
+          ? e.message || "Couldn't send file."
+          : "Couldn't send file. Try again.",
+      )
+    } finally {
+      setUploading(false)
+      if (fileRef.current) fileRef.current.value = ""
+    }
+  }
+
   const [toggling, setToggling] = useState(false)
   async function toggleThreadStatus() {
     if (!activeId || toggling) return
@@ -609,9 +647,21 @@ export default function AdminSupportPage() {
                               : "rounded-bl-md bg-white text-slate-900 ring-1 ring-slate-200",
                           )}
                         >
-                          <p className="whitespace-pre-wrap break-words">
-                            {m.body}
-                          </p>
+                          {m.attachment && (
+                            <AttachmentBubble
+                              attachment={m.attachment}
+                              messageId={m.id}
+                              mine={mine}
+                              load={() =>
+                                fetchAdminAttachment(m.threadId, m.id)
+                              }
+                            />
+                          )}
+                          {m.body && (
+                            <p className="whitespace-pre-wrap break-words">
+                              {m.body}
+                            </p>
+                          )}
                           <div
                             className={cn(
                               "mt-1 text-[10px]",
@@ -654,6 +704,40 @@ export default function AdminSupportPage() {
                 }}
                 className="flex items-end gap-2 border-t border-slate-200 bg-white px-3 pt-3 pb-[max(0.75rem,env(safe-area-inset-bottom))]"
               >
+                {/* Guest (logged-out) threads are text-only — no userId means
+                    the visitor can't authenticate an attachment download. */}
+                {activeThread.userId && (
+                  <>
+                    <input
+                      ref={fileRef}
+                      type="file"
+                      accept={ATTACH_ACCEPT}
+                      hidden
+                      onChange={(e) => void onPickFile(e.target.files?.[0])}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => fileRef.current?.click()}
+                      disabled={
+                        uploading || sending || activeThread.status === "closed"
+                      }
+                      aria-label="Attach a file"
+                      title="Attach an image, PDF, or Word document"
+                      className={cn(
+                        "flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full transition",
+                        uploading || activeThread.status === "closed"
+                          ? "bg-slate-200 text-slate-400"
+                          : "bg-slate-100 text-slate-600 hover:bg-slate-200",
+                      )}
+                    >
+                      {uploading ? (
+                        <Loader2 className="h-4 w-4 animate-spin" aria-hidden />
+                      ) : (
+                        <Paperclip className="h-4 w-4" aria-hidden />
+                      )}
+                    </button>
+                  </>
+                )}
                 <textarea
                   rows={1}
                   value={draft}
@@ -676,6 +760,7 @@ export default function AdminSupportPage() {
                   disabled={
                     !draft.trim() ||
                     sending ||
+                    uploading ||
                     activeThread.status === "closed"
                   }
                   aria-label="Send reply"

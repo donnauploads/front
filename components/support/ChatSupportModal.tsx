@@ -2,17 +2,25 @@
 
 import { useEffect, useRef, useState } from "react"
 import { AnimatePresence, motion } from "framer-motion"
-import { Send, ShieldCheck, X } from "lucide-react"
+import { Loader2, Paperclip, Send, ShieldCheck, X } from "lucide-react"
 import { useStore } from "@/lib/store"
 import { cn } from "@/lib/utils"
 import { BRAND_NAME } from "@/lib/brand"
+import { ApiError } from "@/lib/api/errors"
 import {
+  fetchMyAttachment,
   listMyMessages,
   markMyThreadRead,
   openMyThread,
+  sendMyAttachment,
   sendMyMessage,
   type SupportMessage,
 } from "@/lib/support/api/support.real"
+import { AttachmentBubble } from "./AttachmentBubble"
+import {
+  ATTACH_ACCEPT,
+  validateAttachment,
+} from "./attachment-validate"
 import { peekSocket, getSocket } from "@/lib/realtime/socket"
 
 /**
@@ -35,7 +43,9 @@ export function ChatSupportModal({
   const [draft, setDraft] = useState("")
   const [loading, setLoading] = useState(false)
   const [sending, setSending] = useState(false)
+  const [uploading, setUploading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const fileRef = useRef<HTMLInputElement>(null)
   const [adminTyping, setAdminTyping] = useState(false)
   /** Set when the admin closes the thread mid-session. Cleared when the
    *  customer's next send spins up a fresh thread. */
@@ -273,6 +283,42 @@ export function ChatSupportModal({
     }
   }
 
+  async function onPickFile(file: File | null | undefined) {
+    if (!file || uploading || sending) return
+    const invalid = validateAttachment(file)
+    if (invalid) {
+      setError(invalid)
+      if (fileRef.current) fileRef.current.value = ""
+      return
+    }
+    emitTyping(false)
+    setError(null)
+    setUploading(true)
+    try {
+      let activeThreadId = threadId
+      if (threadClosed || !activeThreadId) {
+        const fresh = await openMyThread()
+        activeThreadId = fresh.id
+        setThreadId(fresh.id)
+        setMessages([])
+        setThreadClosed(false)
+      }
+      const created = await sendMyAttachment(activeThreadId, file)
+      setMessages((prev) =>
+        prev.some((m) => m.id === created.id) ? prev : [...prev, created],
+      )
+    } catch (e) {
+      setError(
+        e instanceof ApiError
+          ? e.message || "Couldn't send file."
+          : "Couldn't send file. Try again.",
+      )
+    } finally {
+      setUploading(false)
+      if (fileRef.current) fileRef.current.value = ""
+    }
+  }
+
   return (
     <AnimatePresence>
       {open && (
@@ -340,7 +386,15 @@ export function ChatSupportModal({
                 return (
                   <div key={m.id} className={cn("chat-msg", mine && "mine")}>
                     <div className="chat-bubble">
-                      <p>{m.body}</p>
+                      {m.attachment && (
+                        <AttachmentBubble
+                          attachment={m.attachment}
+                          messageId={m.id}
+                          mine={mine}
+                          load={() => fetchMyAttachment(m.threadId, m.id)}
+                        />
+                      )}
+                      {m.body && <p>{m.body}</p>}
                       <div className="ts">
                         {new Date(m.createdAt).toLocaleTimeString([], {
                           hour: "2-digit",
@@ -376,6 +430,27 @@ export function ChatSupportModal({
               }}
               className="chat-form"
             >
+              <input
+                ref={fileRef}
+                type="file"
+                accept={ATTACH_ACCEPT}
+                hidden
+                onChange={(e) => void onPickFile(e.target.files?.[0])}
+              />
+              <button
+                type="button"
+                onClick={() => fileRef.current?.click()}
+                disabled={uploading || sending}
+                aria-label="Attach a file"
+                title="Attach an image, PDF, or Word document"
+                className="chat-send"
+              >
+                {uploading ? (
+                  <Loader2 className="animate-spin" aria-hidden />
+                ) : (
+                  <Paperclip aria-hidden />
+                )}
+              </button>
               <textarea
                 rows={1}
                 value={draft}
@@ -395,7 +470,7 @@ export function ChatSupportModal({
               />
               <button
                 type="submit"
-                disabled={!draft.trim() || sending}
+                disabled={!draft.trim() || sending || uploading}
                 aria-label="Send"
                 className="chat-send"
               >

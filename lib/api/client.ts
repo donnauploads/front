@@ -54,6 +54,58 @@ export async function apiFetch<T>(path: string, init: ApiInit = {}): Promise<T> 
   return doFetch<T>(path, init, /* isRetry */ false)
 }
 
+/**
+ * Authenticated binary fetch → Blob. Used for private downloads (e.g. support
+ * chat attachments) that must carry the Bearer token — an <img src>/<a href>
+ * can't set headers, so the caller turns the returned Blob into an object URL.
+ * Mirrors doFetch's single 401 → refresh → retry.
+ */
+export async function apiFetchBlob(path: string): Promise<Blob> {
+  return doFetchBlob(path, /* isRetry */ false)
+}
+
+async function doFetchBlob(path: string, isRetry: boolean): Promise<Blob> {
+  const url = path.startsWith("http") ? path : `${BASE}${path}`
+  const headers = new Headers()
+  const token = getAccessToken()
+  if (token) headers.set("Authorization", `Bearer ${token}`)
+  headers.set("ngrok-skip-browser-warning", "true")
+
+  const controller = new AbortController()
+  const timer = setTimeout(() => controller.abort(), 30_000)
+  let res: Response
+  try {
+    res = await fetch(url, {
+      headers,
+      credentials: "include",
+      signal: controller.signal,
+    })
+  } catch (e) {
+    clearTimeout(timer)
+    throw new NetworkError(e)
+  }
+  clearTimeout(timer)
+
+  if (res.status === 401 && !isRetry) {
+    try {
+      await refreshTokens()
+    } catch {
+      handleSessionLost()
+      throw new UnauthorizedError()
+    }
+    return doFetchBlob(path, /* isRetry */ true)
+  }
+  if (!res.ok) {
+    throw new ApiError(
+      `HTTP_${res.status}`,
+      `Couldn't load attachment (${res.status})`,
+      undefined,
+      res.status,
+    )
+  }
+  return res.blob()
+}
+
 async function doFetch<T>(
   path: string,
   init: ApiInit,
