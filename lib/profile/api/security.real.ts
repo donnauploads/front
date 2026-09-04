@@ -51,6 +51,12 @@ export type BiometricEnrollment = {
   createdAt: string
   lastUsedAt: string | null
   transports: string[]
+  /** The device this passkey is bound to (for an accurate, per-device label). */
+  device?: {
+    name: string | null
+    os: string | null
+    browser: string | null
+  } | null
 }
 
 export type TotpBeginResponse = {

@@ -448,10 +448,9 @@ export default function SecurityCenterPage() {
                         <div
                           style={{ fontSize: 12, color: "var(--ink-mute)" }}
                         >
-                          Added {relTime(e.createdAt)}
                           {e.lastUsedAt
-                            ? ` · last used ${relTime(e.lastUsedAt)}`
-                            : ""}
+                            ? `Last used ${relTime(e.lastUsedAt)}`
+                            : `Added ${relTime(e.createdAt)}`}
                         </div>
                       </div>
                       <button
@@ -1655,19 +1654,36 @@ function relTime(iso: string): string {
 }
 
 /**
- * Friendly label for a passkey row, inferred from its WebAuthn transports.
- * A synced passkey (iCloud/Google) shows as one platform entry even though
- * it works on several devices — that's the truth, so we don't fake a
- * per-device name.
+ * Short, device-accurate label for a passkey row. Prefers the actual device
+ * (OS · browser) the enrollment is bound to; falls back to the WebAuthn
+ * transport when no device record is available.
  */
 function passkeyLabel(e: BiometricEnrollment): string {
+  const os = prettyOs(e.device?.os)
+  const browser = e.device?.browser?.trim() || null
+  if (os && browser) return `${os} · ${browser}`
+  if (os) return os
+  if (browser) return browser
   const t = e.transports ?? []
-  if (t.includes("internal"))
-    return "Platform passkey (Face ID / Touch ID / Windows Hello)"
-  if (t.includes("hybrid")) return "Phone passkey (added via another device)"
-  if (t.some((x) => x === "usb" || x === "nfc" || x === "ble"))
-    return "Security key"
-  return "Passkey"
+  if (t.includes("hybrid")) return "Phone passkey"
+  if (t.some((x) => x === "usb" || x === "nfc" || x === "ble")) return "Security key"
+  return "This device"
+}
+
+/** Collapse a raw OS/user-agent string to a short, recognizable name. */
+function prettyOs(os?: string | null): string | null {
+  const s = (os ?? "").toLowerCase()
+  if (!s) return null
+  if (s.includes("windows")) return "Windows"
+  if (s.includes("iphone") || s.includes("ios")) return "iPhone"
+  if (s.includes("ipad")) return "iPad"
+  if (s.includes("mac")) return "Mac"
+  if (s.includes("android")) return "Android"
+  if (s.includes("linux")) return "Linux"
+  if (s.includes("chrome os") || s.includes("cros")) return "ChromeOS"
+  // Unknown but non-empty — surface the first token capitalized.
+  const first = (os ?? "").trim().split(/[\s/]+/)[0]
+  return first ? first.charAt(0).toUpperCase() + first.slice(1) : null
 }
 
 // ─── WebAuthn biometric enrollment ────────────────────────────────────────
