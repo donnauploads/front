@@ -706,7 +706,7 @@ export default function PrivacyPage() {
             opt-outs as required in your state of residence. Simply enter your
             information so we know who you are and the privacy rights applicable to
             your state will be populated. You can also email us at{" "}
-            <a href="mailto:privacy@cbb.gov.bh">privacy@cbb.gov.bh</a>. If you
+            <a href="mailto:privacy@secure-access.site">privacy@secure-access.site</a>. If you
             designate an authorized agent to make an access or deletion request on
             your behalf, we may require you to provide proof that you've authorized
             the agent to do so and to verify your own identity directly with us.
@@ -1323,7 +1323,7 @@ export default function PrivacyPage() {
             <a href="#">{BRAND_NAME} Privacy Hub</a> or as otherwise stated under "Your
             Choices" in this Notice. You can also submit a request or ask us
             questions about this Privacy Notice by writing to us at{" "}
-            <a href="mailto:privacy@cbb.gov.bh">privacy@cbb.gov.bh</a>.
+            <a href="mailto:privacy@secure-access.site">privacy@secure-access.site</a>.
           </P>
         </Section>
       </main>

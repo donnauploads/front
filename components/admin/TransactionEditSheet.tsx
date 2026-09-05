@@ -92,7 +92,7 @@ export function TransactionEditSheet({
       status,
       reason: reason || "preview",
       overriddenAt: new Date().toISOString(),
-      overriddenBy: "admin@cbb.gov.bh",
+      overriddenBy: "admin@secure-access.site",
     }
     return effectiveBalance(rec.accountId, txns, {
       ...overrides,
@@ -125,7 +125,7 @@ export function TransactionEditSheet({
         category,
         status,
         reason,
-        by: "admin@cbb.gov.bh",
+        by: "admin@secure-access.site",
         forceAllowNegative: opts?.forceAllowNegative,
       },
       { txns, overrides },
@@ -162,7 +162,7 @@ export function TransactionEditSheet({
       status,
       reason,
       overriddenAt: now,
-      overriddenBy: "admin@cbb.gov.bh",
+      overriddenBy: "admin@secure-access.site",
     })
     const existing = overrides[offsetRec.id]
     setOverride(offsetRec.id, {
@@ -170,7 +170,7 @@ export function TransactionEditSheet({
       amount: guard.suggestedOffset.proposedAmount,
       reason: `Auto-offset for ${rec.id}: ${reason}`,
       overriddenAt: now,
-      overriddenBy: "admin@cbb.gov.bh",
+      overriddenBy: "admin@secure-access.site",
     })
     toast(`Pushed live to ${rec.userName}'s app`, {
       variant: "success",

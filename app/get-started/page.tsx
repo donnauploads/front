@@ -44,7 +44,7 @@ import {
 } from "@/components/get-started/PhoneInput"
 import "./signup-sb.css"
 
-/** Central Bahrain Bank heraldic crest — the full detailed version that
+/** State Bank heraldic crest — the full detailed version that
  *  matches the homepage nav (sun/compass motif + colonnade). */
 function SuCrest({ className = "su-crest" }: { className?: string }) {
   return (
@@ -2631,7 +2631,7 @@ function DisclosuresModal({
       >
         <div className="legal-head">
           <div>
-            <div className="legal-kicker">Central Bahrain Bank</div>
+            <div className="legal-kicker">{BRAND_NAME}</div>
             <h3 id="legalTitle">Privacy Policy</h3>
           </div>
           <button className="legal-close" onClick={onClose} aria-label="Close">
@@ -2649,7 +2649,7 @@ function DisclosuresModal({
         </div>
         <div className="legal-body">
           <p>
-            This statement applies to Central Bahrain Bank&apos;s website and
+            This statement applies to {BRAND_NAME}&apos;s website and
             online banking services, and describes how we handle your personal
             information, that is, information about you which is personally
             identifiable, such as your name, address, email address and phone

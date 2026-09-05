@@ -39,11 +39,11 @@ export function BulkShiftBar({
       ids,
       deltaDays: effective,
       reason,
-      by: "superadmin@cbb.gov.bh",
+      by: "superadmin@secure-access.site",
     })
     setSubmitting(false)
     if (!res.ok) return
-    bulk(ids, effective, reason, "superadmin@cbb.gov.bh")
+    bulk(ids, effective, reason, "superadmin@secure-access.site")
     toast(
       `Shifted ${res.count} transaction${res.count === 1 ? "" : "s"} by ${effective > 0 ? "+" : ""}${effective}d.`,
       { variant: "success", duration: 2200 },
