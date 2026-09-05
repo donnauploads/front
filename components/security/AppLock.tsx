@@ -13,7 +13,11 @@ import {
 } from "@/lib/security/api/transaction-pin"
 import { logout, signInWithBiometric } from "@/lib/auth/api/auth.real"
 import { ApiError } from "@/lib/api/errors"
-import { readAppLock, setAppLock } from "@/lib/security/app-lock"
+import {
+  isAppUnlocked,
+  markAppLocked,
+  markAppUnlocked,
+} from "@/lib/security/app-lock"
 
 /** How long the tab must be hidden/blurred before the app locks. */
 const AWAY_LOCK_MS = 30_000
@@ -34,37 +38,74 @@ export function AppLock() {
   const authed = !USE_MOCKS && status === "authenticated"
 
   const [pinEnabled, setPinEnabled] = useState(false)
-  // Restore the lock across a refresh (AppLock only mounts client-side in the
-  // authenticated branch, so reading localStorage here is hydration-safe).
-  const [locked, setLocked] = useState<boolean>(() => readAppLock())
+  // Whether the PIN-status check has resolved yet (so we don't lock — or
+  // auto-unlock — before we know if the user even has a PIN to unlock with).
+  const [pinKnown, setPinKnown] = useState(false)
+  // FAIL CLOSED: start locked whenever there's no positive unlock marker for
+  // this browser. A normal refresh keeps the marker (localStorage), so it stays
+  // unlocked; clearing site data or an idle-lock drops the marker, so a reload
+  // lands here LOCKED instead of walking past the PIN wall. (AppLock only mounts
+  // client-side in the authenticated branch, so reading storage here is
+  // hydration-safe.)
+  const [locked, setLocked] = useState<boolean>(() => !isAppUnlocked())
   const awayAt = useRef<number | null>(null)
   const timerRef = useRef<number | null>(null)
 
   const lock = useCallback(() => {
     setLocked(true)
-    setAppLock(true)
+    markAppLocked()
   }, [])
   const unlock = useCallback(() => {
     setLocked(false)
-    setAppLock(false)
+    markAppUnlocked()
   }, [])
 
   // Is a PIN available to unlock with? (checked once per session)
   useEffect(() => {
     if (!authed) {
       setPinEnabled(false)
+      setPinKnown(false)
       return
     }
     let cancelled = false
     getTransactionPinStatus()
       .then((r) => {
-        if (!cancelled) setPinEnabled(r.enabled)
+        if (!cancelled) {
+          setPinEnabled(r.enabled)
+          setPinKnown(true)
+        }
       })
-      .catch(() => {})
+      .catch(() => {
+        if (!cancelled) {
+          setPinEnabled(false)
+          setPinKnown(true)
+        }
+      })
     return () => {
       cancelled = true
     }
   }, [authed])
+
+  // Fail-closed reconciliation once we're authenticated:
+  //   • a valid unlock marker → unlocked;
+  //   • no marker + a PIN exists → LOCK (the cleared-storage / idle-reload case
+  //     the privacy screen must catch);
+  //   • no marker + NO PIN → the user can't unlock, so never trap them: adopt
+  //     an unlocked marker and let them through.
+  useEffect(() => {
+    if (!authed) return
+    if (isAppUnlocked()) {
+      setLocked(false)
+      return
+    }
+    if (!pinKnown) return
+    if (pinEnabled) {
+      setLocked(true)
+    } else {
+      markAppUnlocked()
+      setLocked(false)
+    }
+  }, [authed, pinEnabled, pinKnown])
 
   // Lock after AWAY_LOCK_MS of INACTIVITY. Two complementary triggers:
   //   1. Idle-on-page — no pointer/keyboard/scroll/touch for the window,
@@ -135,7 +176,11 @@ export function AppLock() {
     }
   }, [authed, pinEnabled, lock])
 
-  if (!locked) return null
+  // Only cover the screen for an authenticated session. `locked` starts true
+  // (fail closed) even before auth resolves, so gating on `authed` here means
+  // the lock appears the instant we're authenticated — with no flash of
+  // dashboard content in between — yet never shows on a logged-out mount.
+  if (!authed || !locked) return null
   return (
     <LockScreen
       firstName={user?.firstName ?? null}

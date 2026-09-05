@@ -1,6 +1,6 @@
 import { apiFetch } from "@/lib/api/client"
 import { clearAccessToken, setAccessToken } from "@/lib/api/token-store"
-import { setAppLock } from "@/lib/security/app-lock"
+import { markAppLocked, markAppUnlocked } from "@/lib/security/app-lock"
 import { markSelfReauth } from "@/lib/auth/reauth-guard"
 
 /**
@@ -78,7 +78,7 @@ export async function login(body: LoginRequest): Promise<LoginResponse> {
   })
   if (res.stage === "session") {
     setAccessToken(res.accessToken, ACCESS_TTL_SECONDS)
-    setAppLock(false) // fresh sign-in clears any persisted privacy lock
+    markAppUnlocked() // fresh sign-in counts as an unlock for this browser
   }
   return res
 }
@@ -92,7 +92,7 @@ export async function verifyMfa(
     skipAuth: true,
   })
   setAccessToken(res.accessToken, ACCESS_TTL_SECONDS)
-  setAppLock(false)
+  markAppUnlocked()
   return res
 }
 
@@ -109,7 +109,7 @@ export async function logout(): Promise<void> {
     await apiFetch<void>("/auth/logout", { method: "POST" })
   } finally {
     clearAccessToken()
-    setAppLock(false)
+    markAppLocked() // drop the unlock marker so a later session starts locked
   }
 }
 
@@ -205,7 +205,7 @@ export async function signInWithBiometric(
     headers: { "X-Timezone": timezone ?? "" },
   })
   setAccessToken(res.accessToken, ACCESS_TTL_SECONDS)
-  setAppLock(false)
+  markAppUnlocked()
   return res
 }
 
