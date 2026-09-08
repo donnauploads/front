@@ -1,28 +1,29 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { Loader2, ShieldCheck } from "lucide-react"
+import { KeyRound, Loader2, ShieldCheck } from "lucide-react"
 import { cn } from "@/lib/utils"
 import {
   getAdminSettings,
   updateAdminSettings,
+  type AdminSettings,
 } from "@/lib/admin/api/settings.real"
 
 /**
- * Admin app settings. Currently a single global control: whether outgoing
- * wires must have their beneficiary name + account matched against the
- * admin-approved beneficiary list.
+ * Admin app settings — global controls that affect all customers:
+ *   • Wire beneficiary verification (match name+account to approved list)
+ *   • Login MFA (show the email-code step vs. straight to dashboard)
  */
 export default function AdminSettingsPage() {
-  const [requireWire, setRequireWire] = useState<boolean | null>(null)
-  const [saving, setSaving] = useState(false)
+  const [settings, setSettings] = useState<AdminSettings | null>(null)
+  const [savingKey, setSavingKey] = useState<keyof AdminSettings | null>(null)
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
     let cancelled = false
     getAdminSettings()
       .then((s) => {
-        if (!cancelled) setRequireWire(s.requireWireBeneficiaryVerification)
+        if (!cancelled) setSettings(s)
       })
       .catch(() => {
         if (!cancelled) setError("Couldn't load settings.")
@@ -32,26 +33,24 @@ export default function AdminSettingsPage() {
     }
   }, [])
 
-  async function toggleWire() {
-    if (requireWire === null || saving) return
-    const next = !requireWire
-    setRequireWire(next) // optimistic
-    setSaving(true)
+  async function toggle(key: keyof AdminSettings) {
+    if (!settings || savingKey) return
+    const next = !settings[key]
+    setSettings({ ...settings, [key]: next }) // optimistic
+    setSavingKey(key)
     setError(null)
     try {
-      const s = await updateAdminSettings({
-        requireWireBeneficiaryVerification: next,
-      })
-      setRequireWire(s.requireWireBeneficiaryVerification)
+      const s = await updateAdminSettings({ [key]: next })
+      setSettings(s)
     } catch {
-      setRequireWire(!next) // revert
+      setSettings((prev) => (prev ? { ...prev, [key]: !next } : prev)) // revert
       setError("Couldn't save. Try again.")
     } finally {
-      setSaving(false)
+      setSavingKey(null)
     }
   }
 
-  const loading = requireWire === null && !error
+  const loading = settings === null && !error
 
   return (
     <div className="space-y-5">
@@ -68,49 +67,110 @@ export default function AdminSettingsPage() {
         </div>
       )}
 
-      <section className="rounded-xl border border-slate-200 bg-white">
-        <div className="flex items-start gap-4 p-5">
-          <span className="mt-0.5 flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-lg bg-slate-100 text-slate-600">
-            <ShieldCheck className="h-5 w-5" aria-hidden />
-          </span>
-          <div className="min-w-0 flex-1">
-            <div className="flex items-center justify-between gap-4">
-              <h2 className="text-sm font-semibold text-slate-900">
-                Wire beneficiary verification
-              </h2>
-              {loading ? (
-                <Loader2
-                  className="h-4 w-4 animate-spin text-slate-400"
-                  aria-hidden
-                />
-              ) : (
-                <Toggle
-                  on={!!requireWire}
-                  busy={saving}
-                  onClick={toggleWire}
-                  label="Require wire beneficiary verification"
-                />
-              )}
-            </div>
-            <p className="mt-1 text-sm leading-relaxed text-slate-500">
-              When <strong>on</strong>, an outgoing wire only goes through if the
-              beneficiary name <em>and</em> account (IBAN, plus SWIFT for
-              international) match an approved beneficiary in the database. When{" "}
-              <strong>off</strong>, customers can wire to any name and account.
-              Either way, every wire still waits in the review queue for admin
-              approval before money moves.
-            </p>
-            <p className="mt-2 text-xs font-medium text-slate-400">
-              {requireWire === null
-                ? ""
-                : requireWire
-                  ? "Verification is ON — unapproved beneficiaries are rejected."
-                  : "Verification is OFF — any beneficiary is accepted."}
-            </p>
-          </div>
-        </div>
-      </section>
+      <SettingRow
+        icon={<ShieldCheck className="h-5 w-5" aria-hidden />}
+        title="Wire beneficiary verification"
+        loading={loading}
+        on={!!settings?.requireWireBeneficiaryVerification}
+        busy={savingKey === "requireWireBeneficiaryVerification"}
+        onToggle={() => toggle("requireWireBeneficiaryVerification")}
+        label="Require wire beneficiary verification"
+        description={
+          <>
+            When <strong>on</strong>, an outgoing wire only goes through if the
+            beneficiary name <em>and</em> account (IBAN, plus SWIFT for
+            international) match an approved beneficiary in the database. When{" "}
+            <strong>off</strong>, customers can wire to any name and account.
+            Either way, every wire still waits in the review queue for admin
+            approval before money moves.
+          </>
+        }
+        status={
+          settings == null
+            ? ""
+            : settings.requireWireBeneficiaryVerification
+              ? "Verification is ON — unapproved beneficiaries are rejected."
+              : "Verification is OFF — any beneficiary is accepted."
+        }
+      />
+
+      <SettingRow
+        icon={<KeyRound className="h-5 w-5" aria-hidden />}
+        title="Login MFA (email code)"
+        loading={loading}
+        on={!!settings?.requireMfaOnLogin}
+        busy={savingKey === "requireMfaOnLogin"}
+        onToggle={() => toggle("requireMfaOnLogin")}
+        label="Require MFA on login"
+        description={
+          <>
+            When <strong>on</strong>, signing in on a new/untrusted device shows
+            the email verification-code step before the dashboard. When{" "}
+            <strong>off</strong>, correct email + password go straight to the
+            dashboard with no code. This is a temporary global override — leave
+            it on for normal security.
+          </>
+        }
+        status={
+          settings == null
+            ? ""
+            : settings.requireMfaOnLogin
+              ? "MFA is ON — the login code step is shown."
+              : "MFA is OFF — login skips the code step."
+        }
+      />
     </div>
+  )
+}
+
+function SettingRow({
+  icon,
+  title,
+  description,
+  status,
+  on,
+  busy,
+  loading,
+  onToggle,
+  label,
+}: {
+  icon: React.ReactNode
+  title: string
+  description: React.ReactNode
+  status: string
+  on: boolean
+  busy: boolean
+  loading: boolean
+  onToggle: () => void
+  label: string
+}) {
+  return (
+    <section className="rounded-xl border border-slate-200 bg-white">
+      <div className="flex items-start gap-4 p-5">
+        <span className="mt-0.5 flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-lg bg-slate-100 text-slate-600">
+          {icon}
+        </span>
+        <div className="min-w-0 flex-1">
+          <div className="flex items-center justify-between gap-4">
+            <h2 className="text-sm font-semibold text-slate-900">{title}</h2>
+            {loading ? (
+              <Loader2
+                className="h-4 w-4 animate-spin text-slate-400"
+                aria-hidden
+              />
+            ) : (
+              <Toggle on={on} busy={busy} onClick={onToggle} label={label} />
+            )}
+          </div>
+          <p className="mt-1 text-sm leading-relaxed text-slate-500">
+            {description}
+          </p>
+          {status && (
+            <p className="mt-2 text-xs font-medium text-slate-400">{status}</p>
+          )}
+        </div>
+      </div>
+    </section>
   )
 }
 
