@@ -24,6 +24,7 @@ import {
   isTransfersBlockedError,
 } from "@/components/security/TransfersBlockedModal"
 import {
+  getWireConfig,
   initiateTransfer,
   quoteTransfer,
   verifyBeneficiary,
@@ -103,6 +104,23 @@ export default function WireTransferPage() {
   const [country, setCountry] = useState("")
   const [beneficiaryAddress, setBeneficiaryAddress] = useState("")
   const [note, setNote] = useState("")
+  // Admin-controlled: when false, the approved-beneficiary check is skipped —
+  // any name/account is accepted and the form doesn't block on verification.
+  // Defaults to true (enforce) until the config loads.
+  const [requireVerification, setRequireVerification] = useState(true)
+  useEffect(() => {
+    let cancelled = false
+    getWireConfig()
+      .then((c) => {
+        if (!cancelled) setRequireVerification(c.requireWireBeneficiaryVerification)
+      })
+      .catch(() => {
+        /* keep the secure default (enforce) if the config can't be read */
+      })
+    return () => {
+      cancelled = true
+    }
+  }, [])
   // International wires can be denominated in the beneficiary's currency.
   // Domestic is always BHD. The account/ledger settles in USD; the backend
   // FX service converts the send amount → USD.
@@ -246,6 +264,12 @@ export default function WireTransferPage() {
   }, [mode, bankName, routingOrSwift, iban])
 
   useEffect(() => {
+    // Admin turned verification OFF → accept any beneficiary; never look up or
+    // block. Stay neutral so the form proceeds.
+    if (!requireVerification) {
+      setAcctCheck("idle")
+      return
+    }
     if (!checkReady) {
       setAcctCheck("idle")
       return
@@ -297,7 +321,7 @@ export default function WireTransferPage() {
       cancelled = true
       clearTimeout(t)
     }
-  }, [checkReady, mode, bankName, beneficiaryName, routingOrSwift, accountNumber, iban])
+  }, [checkReady, mode, bankName, beneficiaryName, routingOrSwift, accountNumber, iban, requireVerification])
 
   // Validation
   const fromAccount = accounts.find((a) => a.id === fromAccountId)
@@ -315,20 +339,32 @@ export default function WireTransferPage() {
     if (!beneficiaryName.trim()) r.push("Beneficiary name is required.")
     if (!bankName.trim()) r.push("Bank name is required.")
     if (mode === "domestic") {
-      if (!BH_IBAN_RE.test(normalizeIban(iban))) {
-        r.push("Enter a valid Bahrain IBAN (BH followed by 20 characters).")
+      // With verification ON we require a well-formed Bahrain IBAN (it must
+      // match an approved beneficiary). With it OFF, accept any account number
+      // the customer types — only require that something is entered.
+      if (requireVerification) {
+        if (!BH_IBAN_RE.test(normalizeIban(iban))) {
+          r.push("Enter a valid Bahrain IBAN (BH followed by 20 characters).")
+        }
+      } else if (!iban.trim()) {
+        r.push("Account number is required.")
       }
     } else {
-      if (!/^[A-Z]{6}[A-Z0-9]{2,5}$/.test(routingOrSwift.trim().toUpperCase())) {
-        r.push("SWIFT/BIC must be 8 or 11 characters (e.g. CHASUS33).")
+      if (requireVerification) {
+        if (!/^[A-Z]{6}[A-Z0-9]{2,5}$/.test(routingOrSwift.trim().toUpperCase())) {
+          r.push("SWIFT/BIC must be 8 or 11 characters (e.g. CHASUS33).")
+        }
+      } else if (!routingOrSwift.trim()) {
+        r.push("SWIFT/BIC is required.")
       }
       if (!iban.trim()) r.push("IBAN is required.")
       if (!country.trim()) r.push("Beneficiary country is required.")
     }
-    // Block submit until the live beneficiary check passes — DOMESTIC only;
-    // this prevents the backend 422 (BENEFICIARY_NOT_FOUND) from firing.
-    // International wires accept any beneficiary, so there's nothing to verify.
-    if (mode === "domestic") {
+    // Block submit until the live beneficiary check passes — DOMESTIC only,
+    // and only when admin verification is ON; this pre-empts the backend 422
+    // (BENEFICIARY_NOT_FOUND). When OFF, any beneficiary is accepted, so there
+    // is nothing to verify or block on.
+    if (mode === "domestic" && requireVerification) {
       if (acctCheck === "checking") r.push("Verifying account details…")
       if (acctCheck === "invalid") {
         r.push("This IBAN isn't a valid beneficiary at this bank.")
@@ -375,6 +411,7 @@ export default function WireTransferPage() {
     fromAccount,
     acctCheck,
     bankCodeMismatch,
+    requireVerification,
   ])
   const canSubmit = reasons.length === 0 && !!sendAmountMinor && !!settleCents
 

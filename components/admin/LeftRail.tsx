@@ -12,6 +12,7 @@ import {
   Mail,
   ScanLine,
   ScrollText,
+  Settings,
   ShieldAlert,
   Users,
   Wallet,
@@ -47,6 +48,7 @@ const ITEMS: ReadonlyArray<{
   { href: "/admin/support", label: "Support", Icon: LifeBuoy, badgeKey: "support" },
   { href: "/admin/mail", label: "Mail", Icon: Mail, badgeKey: "mail" },
   { href: "/admin/audit", label: "Audit Log", Icon: ScrollText },
+  { href: "/admin/settings", label: "Settings", Icon: Settings },
 ]
 
 export function LeftRail({

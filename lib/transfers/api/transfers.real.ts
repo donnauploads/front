@@ -94,6 +94,17 @@ export type VerifyBeneficiaryResult = {
   beneficiaryName: string | null
 }
 
+/** Whether the admin requires wire beneficiaries to match the approved list.
+ *  The wire form reads this to decide if it should enforce the live check /
+ *  block on unverified beneficiaries. Authenticated, non-sensitive. */
+export function getWireConfig(): Promise<{
+  requireWireBeneficiaryVerification: boolean
+}> {
+  return apiFetch<{ requireWireBeneficiaryVerification: boolean }>(
+    "/settings/public",
+  )
+}
+
 /** Live check used by the wire form as the customer types the routing +
  *  account (or SWIFT + IBAN). Confirms the numbers belong to an approved
  *  beneficiary at the entered bank. Read-only — safe to call (debounced)
