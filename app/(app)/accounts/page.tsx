@@ -7,12 +7,13 @@ import { cn } from "@/lib/utils"
 import type { Account, Transaction } from "@/lib/store"
 import { type DisplayCurrency, convertFromBase, currencyDecimals } from "@/lib/currency"
 import { BRAND_NAME } from "@/lib/brand"
+import { BondsBox } from "@/components/bonds/BondsBox"
 
 /**
  * Accounts view — the dedicated "Your accounts" screen reached from the
  * sidebar's Accounts entry. Lists every State Bank account
- * with its balance + actions, then the current account's recent activity
- * as a date/merchant/amount table. Reads from the zustand store so it
+ * with its balance + actions, then the most recent activity across all
+ * accounts as a date/merchant/amount table. Reads from the zustand store so it
  * reflects real transfers, payments, and deposits.
  */
 
@@ -69,15 +70,10 @@ export default function AccountsPage() {
   const transactions = useStore((s) => s.transactions)
   const currency = useStore((s) => s.displayCurrency)
 
-  const primary = useMemo(
-    () => accounts.find((a) => a.type === "checking") ?? accounts[0],
-    [accounts],
-  )
-
-  const primaryTxns = useMemo(() => {
-    if (!primary) return []
-    return transactions.filter((t) => t.accountId === primary.id).slice(0, 20)
-  }, [transactions, primary])
+  // Most recent activity across every account (current, savings, bonds…),
+  // newest first — same feed the Home page uses, so bond redemptions and
+  // other non-checking movements show up here too.
+  const recentTxns = useMemo(() => transactions.slice(0, 5), [transactions])
 
   return (
     <>
@@ -94,12 +90,13 @@ export default function AccountsPage() {
         ) : (
           accounts.map((a) => <AccountCard key={a.id} account={a} currency={currency} />)
         )}
+        <BondsBox />
       </div>
 
-      {primary && (
+      {accounts.length > 0 && (
         <div className="ra-card">
           <div className="ra-head">
-            <h3>Current Account, recent activity</h3>
+            <h3>Recent activity</h3>
             <Link className="ra-all" href="/home/spending">
               All <span aria-hidden>→</span>
             </Link>
@@ -109,10 +106,10 @@ export default function AccountsPage() {
             <span>Description</span>
             <span className="ra-h-amt">Amount</span>
           </div>
-          {primaryTxns.length === 0 ? (
-            <div className="ra-empty">No recent activity on this account.</div>
+          {recentTxns.length === 0 ? (
+            <div className="ra-empty">No recent activity yet.</div>
           ) : (
-            primaryTxns.map((t) => <ActivityRow key={t.id} txn={t} currency={currency} />)
+            recentTxns.map((t) => <ActivityRow key={t.id} txn={t} currency={currency} />)
           )}
         </div>
       )}

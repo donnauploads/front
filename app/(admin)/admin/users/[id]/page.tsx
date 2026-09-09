@@ -10,6 +10,13 @@ import { ApiError } from "@/lib/api/errors"
 import { useToast } from "@/components/providers/ToastProvider"
 import { useIsAtLeast } from "@/components/admin/RoleGate"
 import {
+  createAdminBond,
+  getAdminBonds,
+  patchAdminBond,
+  recordAdminBondEarnings,
+  type AdminBond,
+} from "@/lib/admin/api/bonds.real"
+import {
   activateAdminUser,
   deactivateAdminUser,
   deleteAdminUser,
@@ -138,6 +145,8 @@ export default function UserDetailPage() {
           )
         }
       />
+
+      <BondsAdminSection userId={user.id} />
 
       <ActivityRow userId={user.id} />
 
@@ -309,6 +318,495 @@ function AccountsGrid({
           }}
         />
       )}
+    </div>
+  )
+}
+
+function BondsAdminSection({ userId }: { userId: string }) {
+  const { toast } = useToast()
+  const [bonds, setBonds] = useState<AdminBond[] | null>(null)
+  const [busyId, setBusyId] = useState<string | null>(null)
+  const [adjust, setAdjust] = useState<AdminBond | null>(null)
+  const [earnings, setEarnings] = useState<AdminBond | null>(null)
+  const [creating, setCreating] = useState(false)
+
+  const refetch = useCallback(() => {
+    getAdminBonds(userId)
+      .then(setBonds)
+      .catch(() => setBonds([]))
+  }, [userId])
+  useEffect(() => {
+    refetch()
+  }, [refetch])
+
+  async function patch(
+    b: AdminBond,
+    p: {
+      issuedAt?: string
+      maturityAt?: string
+      lockedByAdmin?: boolean
+      waivePeriod?: boolean
+      ratePct?: number
+    },
+    okMsg: string,
+  ) {
+    setBusyId(b.id)
+    try {
+      await patchAdminBond(b.id, p)
+      toast(okMsg, { variant: "success", duration: 1800 })
+      refetch()
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : ""
+      toast(msg || "Couldn't update bond.", { variant: "error" })
+    } finally {
+      setBusyId(null)
+    }
+  }
+
+  return (
+    <div className="rounded-xl border border-slate-200 bg-white p-4 sm:p-6">
+      <div className="flex items-center justify-between">
+        <h2 className="text-sm font-semibold text-slate-900">Bonds</h2>
+        <button
+          type="button"
+          onClick={() => setCreating((v) => !v)}
+          className="inline-flex items-center gap-1 rounded-lg border border-slate-200 bg-white px-2.5 py-1 text-[11px] font-semibold text-slate-700 transition hover:bg-slate-50"
+        >
+          <Banknote className="h-3.5 w-3.5" aria-hidden />
+          {creating ? "Cancel" : "Create bond"}
+        </button>
+      </div>
+
+      {creating && (
+        <CreateBondForm
+          userId={userId}
+          onDone={() => {
+            setCreating(false)
+            refetch()
+          }}
+        />
+      )}
+
+      {bonds === null ? (
+        <p className="mt-3 text-sm text-slate-500">Loading bonds…</p>
+      ) : bonds.length === 0 ? (
+        <p className="mt-3 text-sm text-slate-500">No bonds for this user.</p>
+      ) : (
+        <div className="mt-3 grid grid-cols-1 gap-3 lg:grid-cols-2">
+          {bonds.map((b) => (
+            <div key={b.id} className="rounded-lg border border-slate-200 bg-slate-50 p-3">
+              <div className="flex items-center justify-between gap-2">
+                <div className="min-w-0">
+                  <div className="truncate text-xs font-semibold uppercase tracking-wider text-slate-500">
+                    {b.label}
+                  </div>
+                  <div className="mt-0.5 text-[10px] text-slate-400">
+                    Issued {new Date(b.createdAt).toLocaleDateString()} · Matures{" "}
+                    {new Date(b.maturityAt).toLocaleDateString()}
+                    {b.matured ? " · matured" : ""}
+                    {b.lockedByAdmin ? " · locked" : ""}
+                    {b.waivePeriod ? " · early-release" : ""}
+                  </div>
+                  <div className="mt-0.5 text-[10px] text-slate-400">
+                    {b.daysElapsed} of {b.termDays} days · {b.daysRemaining} remaining
+                  </div>
+                  <div className="mt-0.5 text-[10px] text-slate-400">
+                    Rate {b.ratePct}% fixed · Opened {formatCents(b.openingPrincipalCents)} ·{" "}
+                    <span
+                      className={cn(
+                        "font-semibold",
+                        BigInt(b.earningsCents) > 0n
+                          ? "text-emerald-600"
+                          : BigInt(b.earningsCents) < 0n
+                            ? "text-rose-600"
+                            : "text-slate-500",
+                      )}
+                    >
+                      {BigInt(b.earningsCents) < 0n ? "−" : "+"}
+                      {formatCents(String(BigInt(b.earningsCents) < 0n ? -BigInt(b.earningsCents) : BigInt(b.earningsCents)))}{" "}
+                      net
+                    </span>
+                  </div>
+                </div>
+                <span className="font-mono text-base font-bold text-slate-900">
+                  {formatCents(b.principalCents)}
+                </span>
+              </div>
+
+              <div className="mt-2 flex flex-wrap items-center gap-1.5">
+                <button
+                  type="button"
+                  onClick={() => setEarnings(b)}
+                  className="inline-flex items-center gap-1 rounded-lg border border-emerald-200 bg-emerald-50 px-2 py-1 text-[11px] font-semibold text-emerald-700 hover:bg-emerald-100"
+                >
+                  <Banknote className="h-3 w-3" aria-hidden /> Profit / loss
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setAdjust(b)}
+                  className="inline-flex items-center gap-1 rounded-lg border border-slate-200 bg-white px-2 py-1 text-[11px] font-semibold text-slate-700 hover:bg-slate-50"
+                >
+                  <Banknote className="h-3 w-3" aria-hidden /> Adjust balance
+                </button>
+                <label className="inline-flex items-center gap-1 text-[11px] text-slate-500">
+                  Rate %
+                  <input
+                    type="number"
+                    step="0.01"
+                    min={0}
+                    max={100}
+                    defaultValue={b.ratePct}
+                    disabled={busyId === b.id}
+                    onBlur={(e) => {
+                      const v = parseFloat(e.target.value)
+                      if (!Number.isFinite(v) || v === b.ratePct) return
+                      patch(b, { ratePct: v }, "Rate updated")
+                    }}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") (e.target as HTMLInputElement).blur()
+                    }}
+                    className="w-16 rounded-md border border-slate-200 bg-white px-1.5 py-0.5 text-[11px]"
+                  />
+                </label>
+                <button
+                  type="button"
+                  disabled={busyId === b.id}
+                  onClick={() =>
+                    patch(
+                      b,
+                      { lockedByAdmin: !b.lockedByAdmin },
+                      b.lockedByAdmin ? "Bond unlocked" : "Bond locked",
+                    )
+                  }
+                  className="inline-flex items-center gap-1 rounded-lg border border-slate-200 bg-white px-2 py-1 text-[11px] font-semibold text-slate-700 hover:bg-slate-50 disabled:opacity-50"
+                >
+                  <Lock className="h-3 w-3" aria-hidden />
+                  {b.lockedByAdmin ? "Unlock" : "Lock"}
+                </button>
+                <button
+                  type="button"
+                  disabled={busyId === b.id}
+                  onClick={() =>
+                    patch(
+                      b,
+                      { waivePeriod: !b.waivePeriod },
+                      b.waivePeriod ? "Waiting period restored" : "Waiting period lifted",
+                    )
+                  }
+                  className="inline-flex items-center gap-1 rounded-lg border border-slate-200 bg-white px-2 py-1 text-[11px] font-semibold text-slate-700 hover:bg-slate-50 disabled:opacity-50"
+                >
+                  {b.waivePeriod ? "Restore wait" : "Lift wait"}
+                </button>
+                <label className="inline-flex items-center gap-1 text-[11px] text-slate-500">
+                  Issued
+                  <input
+                    type="date"
+                    defaultValue={b.createdAt.slice(0, 10)}
+                    disabled={busyId === b.id}
+                    onChange={(e) => {
+                      if (!e.target.value) return
+                      patch(
+                        b,
+                        { issuedAt: new Date(e.target.value).toISOString() },
+                        "Issue date updated",
+                      )
+                    }}
+                    className="rounded-md border border-slate-200 bg-white px-1.5 py-0.5 text-[11px]"
+                  />
+                </label>
+                <label className="inline-flex items-center gap-1 text-[11px] text-slate-500">
+                  Maturity
+                  <input
+                    type="date"
+                    defaultValue={b.maturityAt.slice(0, 10)}
+                    disabled={busyId === b.id}
+                    onChange={(e) => {
+                      if (!e.target.value) return
+                      patch(
+                        b,
+                        { maturityAt: new Date(e.target.value).toISOString() },
+                        "Maturity updated",
+                      )
+                    }}
+                    className="rounded-md border border-slate-200 bg-white px-1.5 py-0.5 text-[11px]"
+                  />
+                </label>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {adjust && (
+        <AdjustBalanceModal
+          account={{
+            id: adjust.id,
+            type: "bond",
+            label: adjust.label,
+            balanceCents: adjust.principalCents,
+            status: "active",
+          }}
+          onClose={() => setAdjust(null)}
+          onAdjusted={() => {
+            setAdjust(null)
+            refetch()
+          }}
+        />
+      )}
+      {earnings && (
+        <BondEarningsModal
+          bond={earnings}
+          onClose={() => setEarnings(null)}
+          onDone={() => {
+            setEarnings(null)
+            refetch()
+          }}
+        />
+      )}
+    </div>
+  )
+}
+
+/**
+ * Record a profit or loss on a bond. Posts a real transaction the customer
+ * sees in the bond's activity list and moves the bond's value.
+ */
+function BondEarningsModal({
+  bond,
+  onClose,
+  onDone,
+}: {
+  bond: AdminBond
+  onClose: () => void
+  onDone: () => void
+}) {
+  const { toast } = useToast()
+  const [direction, setDirection] = useState<"profit" | "loss">("profit")
+  const [amount, setAmount] = useState("")
+  const [note, setNote] = useState("")
+  const [busy, setBusy] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+
+  const cents = Math.round((parseFloat(amount) || 0) * 100)
+  const valid = cents > 0 && !busy
+
+  async function submit() {
+    if (!valid) return
+    setBusy(true)
+    setError(null)
+    const signed = direction === "profit" ? cents : -cents
+    try {
+      await recordAdminBondEarnings(bond.id, {
+        amountCents: String(signed),
+        ...(note.trim() ? { note: note.trim() } : {}),
+      })
+      toast(
+        `${direction === "profit" ? "Profit" : "Loss"} of ${formatCents(String(cents))} recorded.`,
+        { variant: "success", duration: 2000 },
+      )
+      onDone()
+    } catch (e) {
+      setError(
+        e instanceof ApiError
+          ? e.message || "Couldn't record the entry."
+          : "Network error — try again.",
+      )
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+      <button aria-label="Close" onClick={onClose} className="absolute inset-0 bg-black/40" />
+      <div className="relative w-full max-w-sm rounded-xl border border-slate-200 bg-white p-5 shadow-xl">
+        <h3 className="text-sm font-semibold text-slate-900">Bond profit / loss — {bond.label}</h3>
+        <p className="mt-1 text-xs text-slate-500">
+          Current value <span className="font-mono">{formatCents(bond.principalCents)}</span>.
+          The customer sees this as a profit or loss entry in the bond&apos;s activity.
+        </p>
+
+        <div className="mt-4 grid grid-cols-2 gap-2">
+          <button
+            type="button"
+            onClick={() => setDirection("profit")}
+            className={cn(
+              "rounded-lg border px-3 py-2 text-sm font-semibold transition",
+              direction === "profit"
+                ? "border-emerald-300 bg-emerald-50 text-emerald-700"
+                : "border-slate-200 bg-white text-slate-600 hover:bg-slate-50",
+            )}
+          >
+            + Profit
+          </button>
+          <button
+            type="button"
+            onClick={() => setDirection("loss")}
+            className={cn(
+              "rounded-lg border px-3 py-2 text-sm font-semibold transition",
+              direction === "loss"
+                ? "border-rose-300 bg-rose-50 text-rose-700"
+                : "border-slate-200 bg-white text-slate-600 hover:bg-slate-50",
+            )}
+          >
+            – Loss
+          </button>
+        </div>
+
+        <div className="mt-3 space-y-3">
+          <Field label="Amount (USD)">
+            <input
+              inputMode="decimal"
+              autoFocus
+              value={amount}
+              onChange={(e) => setAmount(e.target.value.replace(/[^\d.]/g, ""))}
+              placeholder="0.00"
+              className="w-full rounded-md border border-slate-200 bg-white px-2 py-1.5 text-sm"
+            />
+          </Field>
+          <Field label="Note (shown to customer, optional)">
+            <input
+              value={note}
+              onChange={(e) => setNote(e.target.value)}
+              maxLength={140}
+              placeholder={direction === "profit" ? "Bond earnings" : "Bond loss"}
+              className="w-full rounded-md border border-slate-200 bg-white px-2 py-1.5 text-sm"
+            />
+          </Field>
+          {error && <p className="text-xs text-rose-600">{error}</p>}
+        </div>
+
+        <div className="mt-4 flex justify-end gap-2">
+          <button
+            type="button"
+            onClick={onClose}
+            className="rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-sm font-semibold text-slate-700 hover:bg-slate-50"
+          >
+            Cancel
+          </button>
+          <button
+            type="button"
+            onClick={submit}
+            disabled={!valid}
+            className={cn(
+              "rounded-lg px-3 py-1.5 text-sm font-semibold text-white disabled:opacity-50",
+              direction === "profit" ? "bg-emerald-600 hover:bg-emerald-700" : "bg-rose-600 hover:bg-rose-700",
+            )}
+          >
+            {busy ? "Saving…" : direction === "profit" ? "Record profit" : "Record loss"}
+          </button>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+function CreateBondForm({
+  userId,
+  onDone,
+}: {
+  userId: string
+  onDone: () => void
+}) {
+  const { toast } = useToast()
+  const today = new Date().toISOString().slice(0, 10)
+  const [label, setLabel] = useState("")
+  const [amount, setAmount] = useState("")
+  // Issue date defaults to today but may be backdated.
+  const [issued, setIssued] = useState(today)
+  const [maturity, setMaturity] = useState("")
+  const [rate, setRate] = useState("")
+  const [saving, setSaving] = useState(false)
+
+  async function submit() {
+    const cents = Math.round((parseFloat(amount) || 0) * 100)
+    if (!label.trim() || cents <= 0 || !issued || !maturity) {
+      toast("Enter a label, a positive amount, an issue date, and a maturity date.", {
+        variant: "error",
+      })
+      return
+    }
+    if (new Date(maturity).getTime() <= new Date(issued).getTime()) {
+      toast("Maturity date must be after the issue date.", { variant: "error" })
+      return
+    }
+    const ratePct = rate.trim() === "" ? 0 : parseFloat(rate)
+    if (!Number.isFinite(ratePct) || ratePct < 0 || ratePct > 100) {
+      toast("Rate must be between 0 and 100 percent.", { variant: "error" })
+      return
+    }
+    setSaving(true)
+    try {
+      await createAdminBond({
+        userId,
+        label: label.trim(),
+        principalCents: String(cents),
+        issuedAt: new Date(issued).toISOString(),
+        maturityAt: new Date(maturity).toISOString(),
+        ratePct,
+      })
+      toast("Bond created.", { variant: "success", duration: 1800 })
+      onDone()
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : ""
+      toast(msg || "Couldn't create bond.", { variant: "error" })
+      setSaving(false)
+    }
+  }
+
+  return (
+    <div className="mt-3 grid grid-cols-1 gap-2 rounded-lg border border-slate-200 bg-slate-50 p-3 sm:grid-cols-2">
+      <input
+        value={label}
+        onChange={(e) => setLabel(e.target.value)}
+        placeholder="Label (e.g. Treasury 2028-A)"
+        className="rounded-md border border-slate-200 bg-white px-2 py-1.5 text-sm"
+      />
+      <input
+        value={amount}
+        onChange={(e) => setAmount(e.target.value.replace(/[^\d.]/g, ""))}
+        placeholder="Amount (USD)"
+        inputMode="decimal"
+        className="rounded-md border border-slate-200 bg-white px-2 py-1.5 text-sm"
+      />
+      <label className="flex flex-col gap-0.5 text-[11px] font-medium text-slate-500">
+        Issue date (may be backdated)
+        <input
+          type="date"
+          value={issued}
+          max={maturity || undefined}
+          onChange={(e) => setIssued(e.target.value)}
+          className="rounded-md border border-slate-200 bg-white px-2 py-1.5 text-sm text-slate-900"
+        />
+      </label>
+      <label className="flex flex-col gap-0.5 text-[11px] font-medium text-slate-500">
+        Maturity date
+        <input
+          type="date"
+          value={maturity}
+          min={issued || undefined}
+          onChange={(e) => setMaturity(e.target.value)}
+          className="rounded-md border border-slate-200 bg-white px-2 py-1.5 text-sm text-slate-900"
+        />
+      </label>
+      <label className="flex flex-col gap-0.5 text-[11px] font-medium text-slate-500">
+        Fixed rate (% — shown to the customer, editable later)
+        <input
+          value={rate}
+          onChange={(e) => setRate(e.target.value.replace(/[^\d.]/g, ""))}
+          placeholder="e.g. 5.25"
+          inputMode="decimal"
+          className="rounded-md border border-slate-200 bg-white px-2 py-1.5 text-sm text-slate-900"
+        />
+      </label>
+      <button
+        type="button"
+        onClick={submit}
+        disabled={saving}
+        className="rounded-lg bg-slate-900 px-3 py-1.5 text-sm font-semibold text-white hover:bg-slate-800 disabled:opacity-50 sm:col-span-2"
+      >
+        {saving ? "Creating…" : "Create bond"}
+      </button>
     </div>
   )
 }

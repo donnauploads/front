@@ -132,6 +132,7 @@ const BANKING: NavEntry[] = [
     matches: (p) =>
       p.startsWith("/accounts") ||
       p.startsWith("/home/savings") ||
+      p.startsWith("/home/bonds") ||
       p === "/home/invest",
   },
   {
@@ -161,7 +162,9 @@ const INSIGHTS: NavEntry[] = [
     icon: ICONS.txns,
     matches: (p) =>
       p === "/home/spending" ||
-      (p.startsWith("/home/spending") && !p.startsWith("/home/spending/card")),
+      (p.startsWith("/home/spending") &&
+        !p.startsWith("/home/spending/card") &&
+        !p.startsWith("/home/spending/insight")),
   },
   {
     label: "Spending Insights",

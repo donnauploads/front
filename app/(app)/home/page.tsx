@@ -11,6 +11,7 @@ import {
   listRecurringTransfers,
   type RecurringTransferDto,
 } from "@/lib/move/api/recurring.real"
+import { BondsBox } from "@/components/bonds/BondsBox"
 
 /**
  * Customer dashboard — Overview view.
@@ -286,6 +287,7 @@ export default function HomeTab() {
         {accounts.slice(0, 3).map((a) => (
           <AccountCard key={a.id} account={a} hidden={hidden} currency={currency} />
         ))}
+        <BondsBox />
       </div>
 
       {/* ── Two-column layout: recent + insights ─────────────────── */}

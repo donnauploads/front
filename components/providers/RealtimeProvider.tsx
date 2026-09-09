@@ -112,7 +112,12 @@ export function RealtimeProvider({
       category?: string
       occurredAt?: string
       kind?: string
+      bondEarnings?: boolean
     }) {
+      // Bond profit/loss entries are internal accounting — they belong only in
+      // the bond's own activity view, never the general account feed. The bond
+      // detail page refetches its activity on bond.changed.
+      if (p.bondEarnings) return
       // Backend now includes description / category / occurredAt on the
       // wire so admin-created rows render correctly on first push. If a
       // previous client-side optimistic insert already filled the row,

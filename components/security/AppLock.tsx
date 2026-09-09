@@ -19,13 +19,17 @@ import {
   markAppUnlocked,
 } from "@/lib/security/app-lock"
 
-/** How long the tab must be hidden/blurred before the app locks. */
-const AWAY_LOCK_MS = 30_000
+/** No pointer/keyboard/scroll/touch while the tab stays in view → lock. */
+const IDLE_LOCK_MS = 4 * 60_000
+/** Tab hidden or window blurred (user left the viewport) → lock. Shorter,
+ *  because an unattended visible screen is the bigger exposure. */
+const AWAY_LOCK_MS = 60_000
 
 /**
- * Privacy lock. Tokens stay valid, but if the user leaves the tab (hidden
- * or blurred) for ≥30s and returns, the UI is covered by a lock screen
- * that re-confirms the person with their transaction PIN or biometrics.
+ * Privacy lock. Tokens stay valid, but the UI is covered by a lock screen
+ * that re-confirms the person with their transaction PIN or biometrics when:
+ *   • the tab is hidden / window blurred for ≥1 min, or
+ *   • the tab stays in view but sees no interaction for ≥4 min.
  *
  * Only engages for an authenticated real-mode session that has a PIN set
  * (the guaranteed unlock path) — never traps a user who can't unlock.
@@ -107,19 +111,22 @@ export function AppLock() {
     }
   }, [authed, pinEnabled, pinKnown])
 
-  // Lock after AWAY_LOCK_MS of INACTIVITY. Two complementary triggers:
-  //   1. Idle-on-page — no pointer/keyboard/scroll/touch for the window,
-  //      even while the tab stays focused (the "30s of inactivity" rule).
-  //   2. Tab-away — the tab is hidden/blurred for the window and comes back.
+  // Two complementary triggers, each with its own window:
+  //   1. Idle-on-page — no pointer/keyboard/scroll/touch for IDLE_LOCK_MS
+  //      while the tab stays in view.
+  //   2. Away — the tab is hidden/blurred for AWAY_LOCK_MS. The timer fires
+  //      in the background where the browser allows; otherwise the elapsed
+  //      time is re-checked on return.
   useEffect(() => {
     if (!authed || !pinEnabled) return
 
-    // (Re)start the idle countdown. A single shared timer serves both the
-    // idle-on-page and background-tab cases.
-    const armIdle = () => {
+    // One shared timer: (re)armed with the idle window while visible, and
+    // with the shorter away window when the user leaves the viewport.
+    const arm = (ms: number) => {
       if (timerRef.current != null) clearTimeout(timerRef.current)
-      timerRef.current = window.setTimeout(() => lock(), AWAY_LOCK_MS)
+      timerRef.current = window.setTimeout(() => lock(), ms)
     }
+    const armIdle = () => arm(IDLE_LOCK_MS)
 
     // Any real interaction resets the countdown. Throttled to ≤1/sec so a
     // stream of mousemove events doesn't thrash the timer.
@@ -146,7 +153,9 @@ export function AppLock() {
     // Tab-away: background tabs throttle timers, so record when we left and
     // re-check the true elapsed time on return.
     const markAway = () => {
-      if (awayAt.current == null) awayAt.current = Date.now()
+      if (awayAt.current != null) return
+      awayAt.current = Date.now()
+      arm(AWAY_LOCK_MS) // shorter window while out of the viewport
     }
     const markBack = () => {
       if (awayAt.current != null) {
@@ -157,7 +166,7 @@ export function AppLock() {
           return
         }
       }
-      armIdle() // resume the idle countdown after returning
+      armIdle() // back in view: resume the longer idle countdown
     }
     const onVisibility = () => (document.hidden ? markAway() : markBack())
 

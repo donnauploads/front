@@ -640,7 +640,7 @@ export default function WireTransferPage() {
                 )}
               </>
             ) : (
-              <ReviewRow k="IBAN" v={normalizeIban(iban)} mono />
+              <ReviewRow k="Account number" v={normalizeIban(iban)} mono />
             )}
           </ReviewCard>
         </div>
@@ -873,7 +873,7 @@ export default function WireTransferPage() {
         </Field>
         {mode === "domestic" ? (
           <>
-            <Field label="IBAN">
+            <Field label="Account number">
               <VerifiedInput
                 value={iban}
                 onChange={(e) =>
@@ -881,7 +881,7 @@ export default function WireTransferPage() {
                     e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 22),
                   )
                 }
-                placeholder="Enter the Beneficiary's IBAN"
+                placeholder="Enter the Beneficiary's account number"
                 className="mono-num uppercase"
                 check={effectiveCheck}
               />
@@ -893,8 +893,8 @@ export default function WireTransferPage() {
             )}
             {acctCheck === "invalid" && (
               <p style={{ padding: "0 4px", fontSize: 11.5, color: "#B23A3A" }}>
-                We couldn&apos;t verify this IBAN. Check the IBAN and the bank
-                or beneficiary name.
+                We couldn&apos;t verify this account. Check the account number
+                and the bank or beneficiary name.
               </p>
             )}
             {acctCheck === "valid" && !bankCodeMismatch && (

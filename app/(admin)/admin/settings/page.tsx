@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { KeyRound, Loader2, ShieldCheck } from "lucide-react"
+import { KeyRound, Loader2, ShieldAlert, ShieldCheck } from "lucide-react"
 import { cn } from "@/lib/utils"
 import {
   getAdminSettings,
@@ -117,6 +117,33 @@ export default function AdminSettingsPage() {
             : settings.requireMfaOnLogin
               ? "MFA is ON — the login code step is shown."
               : "MFA is OFF — login skips the code step."
+        }
+      />
+
+      <SettingRow
+        icon={<ShieldAlert className="h-5 w-5" aria-hidden />}
+        title="Apply MFA skip to admins"
+        loading={loading}
+        on={!!settings?.mfaSkipAppliesToAdmins}
+        busy={savingKey === "mfaSkipAppliesToAdmins"}
+        onToggle={() => toggle("mfaSkipAppliesToAdmins")}
+        label="Apply the MFA skip to admin accounts"
+        description={
+          <>
+            Only matters while <strong>Login MFA is off</strong>. When{" "}
+            <strong>off</strong> (recommended), admin and superadmin sign-ins
+            still go through the email code even though customers skip it. When{" "}
+            <strong>on</strong>, staff logins skip the code too.
+          </>
+        }
+        status={
+          settings == null
+            ? ""
+            : settings.requireMfaOnLogin
+              ? "No effect right now — Login MFA is on for everyone."
+              : settings.mfaSkipAppliesToAdmins
+                ? "Admins ALSO skip the code step."
+                : "Admins still get the code step."
         }
       />
     </div>

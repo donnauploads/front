@@ -10,6 +10,9 @@ export type AdminSettings = {
   /** When true, login shows the MFA step; when false, correct credentials go
    *  straight to the dashboard. */
   requireMfaOnLogin: boolean
+  /** When the MFA skip is on, whether it also applies to admin/superadmin
+   *  logins. Default false = staff accounts keep MFA. */
+  mfaSkipAppliesToAdmins: boolean
 }
 
 export function getAdminSettings(): Promise<AdminSettings> {
