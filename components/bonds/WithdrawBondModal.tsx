@@ -9,6 +9,7 @@ import {
   type Bond,
   type BondWithdrawPayload,
 } from "@/lib/bonds/api/bonds.real"
+import { currencySymbol, fmtCentsIn } from "@/lib/bonds/format"
 import type { RealLinkedAccountDto } from "@/lib/move/api/link-auth.real"
 
 /** Supported crypto assets + their networks for a bond payout. */
@@ -71,8 +72,7 @@ export function WithdrawBondModal({
     [asset],
   )
 
-  const principal = Number(BigInt(bond.principalCents)) / 100
-  const amountLabel = `$${principal.toLocaleString("en-US", { minimumFractionDigits: 2 })}`
+  const amountLabel = `${currencySymbol(bond.currency)}${fmtCentsIn(bond.principalCents, bond.currency)}`
 
   const payload = useMemo<BondWithdrawPayload | null>(() => {
     if (sel.startsWith("acct:")) return { destination: "internal", toAccountId: sel.slice(5) }

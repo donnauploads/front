@@ -4,12 +4,14 @@
  *   POST /bonds/:id/withdraw     → { transferId, ... }  (PIN-gated, held for review)
  */
 import { apiFetch } from "@/lib/api/client"
+import type { DisplayCurrency } from "@/lib/currency"
 
 export type Bond = {
   id: string
   label: string
   principalCents: string
-  currency: "USD"
+  /** Admin-set display currency. Shown as-is (no FX conversion). */
+  currency: DisplayCurrency
   createdAt: string
   maturityAt: string
   lockedByAdmin: boolean

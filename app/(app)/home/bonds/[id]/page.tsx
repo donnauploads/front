@@ -9,7 +9,8 @@ import { useToast } from "@/components/providers/ToastProvider"
 import { WithdrawBondModal } from "@/components/bonds/WithdrawBondModal"
 import { useBonds } from "@/lib/bonds/use-bonds"
 import { getBondActivity, type BondActivityEntry } from "@/lib/bonds/api/bonds.real"
-import { bondStatusLabel, earningsPct, fmtCents, fmtLongDate, fmtRate, fmtSignedCents } from "@/lib/bonds/format"
+import { bondStatusLabel, currencySymbol, earningsPct, fmtCentsIn, fmtLongDate, fmtRate, fmtSignedCents } from "@/lib/bonds/format"
+import type { DisplayCurrency } from "@/lib/currency"
 import {
   listMyLinkedAccounts,
   type RealLinkedAccountDto,
@@ -99,7 +100,9 @@ export default function BondDetailPage() {
             ) : activity.length === 0 ? (
               <div className="ra-empty">No activity on this bond yet.</div>
             ) : (
-              activity.map((e) => <ActivityRow key={e.id} entry={e} />)
+              activity.map((e) => (
+                <ActivityRow key={e.id} entry={e} currency={bond.currency} />
+              ))
             )}
           </div>
         </>
@@ -147,11 +150,11 @@ function BondSummary({
       </div>
 
       <div className="acct-bal">
-        <span className="cur">USD</span>
-        {fmtCents(bond.principalCents)}
+        <span className="cur">{bond.currency}</span>
+        {fmtCentsIn(bond.principalCents, bond.currency)}
       </div>
       <div className="acct-no" style={{ marginTop: 4 }}>
-        Opened with ${fmtCents(bond.openingPrincipalCents)}
+        Opened with {currencySymbol(bond.currency)}{fmtCentsIn(bond.openingPrincipalCents, bond.currency)}
       </div>
 
       <div style={{ display: "grid", gap: 4, margin: "10px 0 14px", fontSize: 13, color: "var(--ink-soft)" }}>
@@ -160,8 +163,8 @@ function BondSummary({
           label="Net earnings"
           value={
             earnings === 0n
-              ? "$0.00"
-              : `${fmtSignedCents(earnings)}${pct !== null ? ` (${pct >= 0 ? "+" : "−"}${Math.abs(pct).toFixed(2)}%)` : ""}`
+              ? `${currencySymbol(bond.currency)}0.00`
+              : `${fmtSignedCents(earnings, bond.currency)}${pct !== null ? ` (${pct >= 0 ? "+" : "−"}${Math.abs(pct).toFixed(2)}%)` : ""}`
           }
           color={earningsColor}
         />
@@ -212,7 +215,13 @@ const KIND_LABEL: Record<BondActivityEntry["kind"], string> = {
   withdrawal: "Withdrawal",
 }
 
-function ActivityRow({ entry }: { entry: BondActivityEntry }) {
+function ActivityRow({
+  entry,
+  currency,
+}: {
+  entry: BondActivityEntry
+  currency: DisplayCurrency
+}) {
   const amount = BigInt(entry.amountCents)
   const incoming = amount > 0n
   const d = new Date(entry.occurredAt)
@@ -248,7 +257,8 @@ function ActivityRow({ entry }: { entry: BondActivityEntry }) {
       </div>
       <div className={cn("ra-amt", incoming && "pos")} style={!incoming ? { color: "#B23A3A" } : undefined}>
         {incoming ? "+" : "−"}
-        {fmtCents(amount)}
+        {currencySymbol(currency)}
+        {fmtCentsIn(amount, currency)}
       </div>
     </div>
   )

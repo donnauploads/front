@@ -9,7 +9,7 @@ import { useToast } from "@/components/providers/ToastProvider"
 import { WithdrawBondModal } from "@/components/bonds/WithdrawBondModal"
 import { useBonds } from "@/lib/bonds/use-bonds"
 import type { Bond } from "@/lib/bonds/api/bonds.real"
-import { bondStatusLabel, earningsPct, fmtCents, fmtLongDate, fmtRate, fmtSignedCents } from "@/lib/bonds/format"
+import { bondStatusLabel, currencySymbol, earningsPct, fmtCentsIn, fmtLongDate, fmtRate, fmtSignedCents } from "@/lib/bonds/format"
 import {
   listMyLinkedAccounts,
   type RealLinkedAccountDto,
@@ -108,8 +108,8 @@ function BondCard({ bond, onWithdraw }: { bond: Bond; onWithdraw: () => void }) 
           style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", gap: 10 }}
         >
           <span>
-            <span className="cur">USD</span>
-            {fmtCents(bond.principalCents)}
+            <span className="cur">{bond.currency}</span>
+            {fmtCentsIn(bond.principalCents, bond.currency)}
           </span>
           {pct !== null && pct !== 0 && (
             <span
@@ -129,7 +129,7 @@ function BondCard({ bond, onWithdraw }: { bond: Bond; onWithdraw: () => void }) 
           <Row label="Rate" value={`${fmtRate(bond.ratePct)} fixed`} />
           <Row
             label="Earnings"
-            value={earnings === 0n ? "$0.00" : fmtSignedCents(earnings)}
+            value={earnings === 0n ? `${currencySymbol(bond.currency)}0.00` : fmtSignedCents(earnings, bond.currency)}
             color={earningsColor}
           />
           <Row label="Issued" value={fmtLongDate(bond.createdAt)} />

@@ -25,6 +25,8 @@ export function createAdminBond(input: {
   maturityAt: string
   /** Fixed rate as a percentage (5.25 = 5.25%). */
   ratePct?: number
+  /** Display currency (USD/BHD/EUR/CNY). Defaults to USD. */
+  currency?: string
 }): Promise<AdminBond> {
   return apiFetch<AdminBond>("/admin/bonds", { method: "POST", body: input })
 }
@@ -39,6 +41,8 @@ export function patchAdminBond(
     label?: string
     /** Fixed rate as a percentage (5.25 = 5.25%). */
     ratePct?: number
+    /** Display currency (USD/BHD/EUR/CNY). */
+    currency?: string
   },
 ): Promise<AdminBond> {
   return apiFetch<AdminBond>(`/admin/bonds/${encodeURIComponent(id)}`, {

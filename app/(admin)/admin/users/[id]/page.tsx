@@ -39,6 +39,7 @@ import {
   type AdminUserStatus,
 } from "@/lib/admin/api/users.real"
 import { createAdminTransaction } from "@/lib/admin/api/transactions.real"
+import { fmtCentsIn } from "@/lib/bonds/format"
 import type { Role } from "@/lib/store"
 
 /**
@@ -322,6 +323,9 @@ function AccountsGrid({
   )
 }
 
+/** Currencies an admin may set on a bond (mirrors the backend allow-list). */
+const BOND_CURRENCY_OPTIONS = ["USD", "BHD", "EUR", "CNY"] as const
+
 function BondsAdminSection({ userId }: { userId: string }) {
   const { toast } = useToast()
   const [bonds, setBonds] = useState<AdminBond[] | null>(null)
@@ -347,6 +351,7 @@ function BondsAdminSection({ userId }: { userId: string }) {
       lockedByAdmin?: boolean
       waivePeriod?: boolean
       ratePct?: number
+      currency?: string
     },
     okMsg: string,
   ) {
@@ -410,6 +415,11 @@ function BondsAdminSection({ userId }: { userId: string }) {
                   <div className="mt-0.5 text-[10px] text-slate-400">
                     {b.daysElapsed} of {b.termDays} days · {b.daysRemaining} remaining
                   </div>
+                  {b.currency !== "USD" && (
+                    <div className="mt-0.5 text-[10px] text-slate-400">
+                      Customer sees {b.currency} {fmtCentsIn(b.principalCents, b.currency)}
+                    </div>
+                  )}
                   <div className="mt-0.5 text-[10px] text-slate-400">
                     Rate {b.ratePct}% fixed · Opened {formatCents(b.openingPrincipalCents)} ·{" "}
                     <span
@@ -429,6 +439,9 @@ function BondsAdminSection({ userId }: { userId: string }) {
                   </div>
                 </div>
                 <span className="font-mono text-base font-bold text-slate-900">
+                  <span className="mr-1 text-[10px] font-semibold text-slate-400">
+                    USD
+                  </span>
                   {formatCents(b.principalCents)}
                 </span>
               </div>
@@ -530,6 +543,23 @@ function BondsAdminSection({ userId }: { userId: string }) {
                     }}
                     className="rounded-md border border-slate-200 bg-white px-1.5 py-0.5 text-[11px]"
                   />
+                </label>
+                <label className="inline-flex items-center gap-1 text-[11px] text-slate-500">
+                  Currency
+                  <select
+                    value={b.currency}
+                    disabled={busyId === b.id}
+                    onChange={(e) =>
+                      patch(b, { currency: e.target.value }, "Currency updated")
+                    }
+                    className="rounded-md border border-slate-200 bg-white px-1.5 py-0.5 text-[11px]"
+                  >
+                    {BOND_CURRENCY_OPTIONS.map((c) => (
+                      <option key={c} value={c}>
+                        {c}
+                      </option>
+                    ))}
+                  </select>
                 </label>
               </div>
             </div>
@@ -716,6 +746,7 @@ function CreateBondForm({
   const [issued, setIssued] = useState(today)
   const [maturity, setMaturity] = useState("")
   const [rate, setRate] = useState("")
+  const [currency, setCurrency] = useState<string>("USD")
   const [saving, setSaving] = useState(false)
 
   async function submit() {
@@ -744,6 +775,7 @@ function CreateBondForm({
         issuedAt: new Date(issued).toISOString(),
         maturityAt: new Date(maturity).toISOString(),
         ratePct,
+        currency,
       })
       toast("Bond created.", { variant: "success", duration: 1800 })
       onDone()
@@ -798,6 +830,20 @@ function CreateBondForm({
           inputMode="decimal"
           className="rounded-md border border-slate-200 bg-white px-2 py-1.5 text-sm text-slate-900"
         />
+      </label>
+      <label className="flex flex-col gap-0.5 text-[11px] font-medium text-slate-500">
+        Display currency (amount is USD; customer sees the equivalent, locked to this)
+        <select
+          value={currency}
+          onChange={(e) => setCurrency(e.target.value)}
+          className="rounded-md border border-slate-200 bg-white px-2 py-1.5 text-sm text-slate-900"
+        >
+          {BOND_CURRENCY_OPTIONS.map((c) => (
+            <option key={c} value={c}>
+              {c}
+            </option>
+          ))}
+        </select>
       </label>
       <button
         type="button"

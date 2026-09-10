@@ -4,6 +4,7 @@ import Link from "next/link"
 import { Landmark } from "lucide-react"
 import { useBonds } from "@/lib/bonds/use-bonds"
 import { fmtSignedCents } from "@/lib/bonds/format"
+import { convertFromBase, currencyDecimals, type DisplayCurrency } from "@/lib/currency"
 
 /**
  * Aggregate "Bonds" card shown on the accounts + home pages. Clicking it opens
@@ -17,21 +18,26 @@ export function BondsBox() {
   if (loading) return null
 
   const empty = bonds.length === 0
-  const totalCents = bonds.reduce((a, b) => a + BigInt(b.principalCents), 0n)
-  const total = Number(totalCents) / 100
   const n = bonds.length
   const countLabel = empty ? "No bonds yet" : `${n} bond${n > 1 ? "s" : ""}`
-  const bal = fmt(total)
 
-  // Net earnings across all bonds, plus the % change against the combined
-  // opening principal.
+  // Bonds are stored dollar-based, so we can sum principals in USD directly.
+  // The aggregate is shown in the bonds' shared display currency when they all
+  // match; otherwise fall back to USD (the base) to avoid a misleading mix.
+  const uniform = bonds.every((b) => b.currency === bonds[0]?.currency)
+  const display: DisplayCurrency = uniform && bonds[0] ? bonds[0].currency : "USD"
+  const totalUsdCents = bonds.reduce((a, b) => a + BigInt(b.principalCents), 0n)
+  const bal = fmt(convertFromBase(Number(totalUsdCents) / 100, display), currencyDecimals(display))
+
+  // Net earnings + % change against opening principal (USD is a valid common
+  // base across all bonds), shown converted to the display currency.
   const earningsCents = bonds.reduce((a, b) => a + BigInt(b.earningsCents), 0n)
   const openingCents = bonds.reduce((a, b) => a + BigInt(b.openingPrincipalCents), 0n)
   const pct = openingCents > 0n ? (Number(earningsCents) / Number(openingCents)) * 100 : null
   const earningsLabel =
     earningsCents === 0n
       ? null
-      : `${fmtSignedCents(earningsCents)} earned${pct !== null ? ` (${pct > 0 ? "▲" : "▼"} ${Math.abs(pct).toFixed(2)}%)` : ""}`
+      : `${fmtSignedCents(earningsCents, display)} earned${pct !== null ? ` (${pct > 0 ? "▲" : "▼"} ${Math.abs(pct).toFixed(2)}%)` : ""}`
   const earningsColor = earningsCents > 0n ? "#2F855A" : earningsCents < 0n ? "#B23A3A" : undefined
 
   return (
@@ -50,7 +56,7 @@ export function BondsBox() {
         </span>
       </div>
       <div className="acct-bal">
-        <span className="cur">USD</span>
+        <span className="cur">{display}</span>
         {bal.whole}
         {bal.dec}
       </div>
@@ -71,8 +77,8 @@ export function BondsBox() {
   )
 }
 
-function fmt(n: number): { whole: string; dec: string } {
-  const s = Math.abs(n).toFixed(2)
+function fmt(n: number, decimals = 2): { whole: string; dec: string } {
+  const s = Math.abs(n).toFixed(decimals)
   const [w, d] = s.split(".")
-  return { whole: Number(w).toLocaleString("en-US"), dec: `.${d}` }
+  return { whole: Number(w).toLocaleString("en-US"), dec: d ? `.${d}` : "" }
 }
